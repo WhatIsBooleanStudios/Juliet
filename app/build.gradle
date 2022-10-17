@@ -11,27 +11,65 @@ plugins {
     id 'application'
 }
 
+import org.gradle.internal.os.OperatingSystem
+
+project.ext.lwjglVersion = "3.3.1"
+
+switch (OperatingSystem.current()) {
+	case OperatingSystem.LINUX:
+		project.ext.lwjglNatives = "natives-linux"
+		break
+	case OperatingSystem.MAC_OS:
+		project.ext.lwjglNatives = "natives-macos"
+		break
+	case OperatingSystem.WINDOWS:
+		project.ext.lwjglNatives = "natives-windows"
+		break
+}
+
 repositories {
-    // Use Maven Central for resolving dependencies.
-    mavenCentral()
+	mavenCentral()
 }
 
 dependencies {
-    // Use JUnit Jupiter for testing.
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.8.2'
+	implementation platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
 
-    // This dependency is used by the application.
-    implementation 'com.google.guava:guava:31.0.1-jre'
-    
-    implementation group: 'org.lwjgl', name: 'lwjgl', version: '3.3.1'
+	implementation "org.lwjgl:lwjgl"
+	implementation "org.lwjgl:lwjgl-assimp"
+	implementation "org.lwjgl:lwjgl-egl"
+	implementation "org.lwjgl:lwjgl-glfw"
+	implementation "org.lwjgl:lwjgl-jemalloc"
+	implementation "org.lwjgl:lwjgl-libdivide"
+	implementation "org.lwjgl:lwjgl-meshoptimizer"
+	implementation "org.lwjgl:lwjgl-nfd"
+	implementation "org.lwjgl:lwjgl-openal"
+	implementation "org.lwjgl:lwjgl-opengl"
+	implementation "org.lwjgl:lwjgl-opengles"
+	implementation "org.lwjgl:lwjgl-par"
+	implementation "org.lwjgl:lwjgl-rpmalloc"
+	implementation "org.lwjgl:lwjgl-shaderc"
+	implementation "org.lwjgl:lwjgl-sse"
+	implementation "org.lwjgl:lwjgl-stb"
+	implementation "org.lwjgl:lwjgl-tinyfd"
+	runtimeOnly "org.lwjgl:lwjgl::$lwjglNatives"
+	runtimeOnly "org.lwjgl:lwjgl-assimp::$lwjglNatives"
+	runtimeOnly "org.lwjgl:lwjgl-glfw::$lwjglNatives"
+	runtimeOnly "org.lwjgl:lwjgl-jemalloc::$lwjglNatives"
+	runtimeOnly "org.lwjgl:lwjgl-libdivide::$lwjglNatives"
+	runtimeOnly "org.lwjgl:lwjgl-meshoptimizer::$lwjglNatives"
+	runtimeOnly "org.lwjgl:lwjgl-nfd::$lwjglNatives"
+	runtimeOnly "org.lwjgl:lwjgl-openal::$lwjglNatives"
+	runtimeOnly "org.lwjgl:lwjgl-opengl::$lwjglNatives"
+	runtimeOnly "org.lwjgl:lwjgl-opengles::$lwjglNatives"
+	runtimeOnly "org.lwjgl:lwjgl-par::$lwjglNatives"
+	runtimeOnly "org.lwjgl:lwjgl-rpmalloc::$lwjglNatives"
+	runtimeOnly "org.lwjgl:lwjgl-shaderc::$lwjglNatives"
+	runtimeOnly "org.lwjgl:lwjgl-sse::$lwjglNatives"
+	runtimeOnly "org.lwjgl:lwjgl-stb::$lwjglNatives"
+	runtimeOnly "org.lwjgl:lwjgl-tinyfd::$lwjglNatives"
 }
 
 application {
     // Define the main class for the application.
     mainClass = 'mclone.App'
-}
-
-tasks.named('test') {
-    // Use JUnit Platform for unit tests.
-    useJUnitPlatform()
 }
