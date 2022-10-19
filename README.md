@@ -10,5 +10,5 @@ Minecraft is an open world adventure game with millions of players, mClone is an
 
 To run to use:
 ```
-./gradlw run
+./gradlew run
 ```
