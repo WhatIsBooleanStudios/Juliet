@@ -30,3 +30,8 @@ build
 
 # Ignore vscode configuration directory
 .vscode
+
+# java project things
+.settings
+.classpath
+.project

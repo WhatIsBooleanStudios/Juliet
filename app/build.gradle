@@ -72,4 +72,5 @@ dependencies {
 application {
     // Define the main class for the application.
     mainClass = 'mclone.App'
+    applicationDefaultJvmArgs = ['-XstartOnFirstThread']
 }
