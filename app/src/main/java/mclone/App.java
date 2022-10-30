@@ -8,6 +8,8 @@ import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
 import org.lwjgl.system.*;
 
+import mclone.Logging.Logger;
+
 import java.nio.*;
 
 import static org.lwjgl.glfw.Callbacks.*;
@@ -17,15 +19,16 @@ import static org.lwjgl.system.MemoryStack.*;
 import static org.lwjgl.system.MemoryUtil.*;
 
 public class App {
-    public String getGreeting() {
-        return "Hello World!";
-    }
-
     // The window handle
     private long window;
 
     public void run() {
         System.out.println("Hello LWJGL " + Version.getVersion() + "!");
+        Logger logger = new Logger(true, "log.txt");
+        logger.error(this, "This is an example error message");
+        logger.warn(this, "This is an example warn message");
+        logger.trace(this, "This is an example trace message");
+        logger.info(this, "This is an example info message");
 
         init();
         loop();
