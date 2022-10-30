@@ -98,7 +98,7 @@ public class Window {
         return mousePosition;
     }
 
-    public void destruct() {
+    public void dispose() {
         glfwFreeCallbacks(m_window);
         glfwDestroyWindow(m_window);
     }

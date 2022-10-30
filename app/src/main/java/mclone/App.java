@@ -7,6 +7,8 @@ import mclone.platform.Window;
 
 import org.lwjgl.*;
 import org.lwjgl.opengl.*;
+import org.lwjgl.system.Callback;
+
 import static org.lwjgl.glfw.GLFW.*;
 
 import static org.lwjgl.opengl.GL33.*;
@@ -25,6 +27,7 @@ public class App {
         init();
         loop();
 
+        m_window.dispose();
         Window.shutdownWindowSystem();
     }
 
@@ -41,6 +44,7 @@ public class App {
         // creates the GLCapabilities instance and makes the OpenGL
         // bindings available for use.
         GL.createCapabilities();
+        Callback cb = GLUtil.setupDebugMessageCallback(System.out);
 
         // Set the clear color
         
