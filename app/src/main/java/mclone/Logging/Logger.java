@@ -71,6 +71,9 @@ public class Logger {
     }
 
     private boolean handleMessage(Object obj, LogType logType, String msg) {
+        if(msg == null)
+            return false;
+            
         switch (logType) {
             case ERROR:
                 System.out.print("\033[31;49;1mERROR\033[37;49;1m " + getTimestamp());
