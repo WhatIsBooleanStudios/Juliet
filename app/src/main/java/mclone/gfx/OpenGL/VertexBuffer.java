@@ -1,8 +1,9 @@
-package mclone.gfx;
+package mclone.gfx.OpenGL;
 
 import java.nio.ByteBuffer;
 
 import org.lwjgl.opengl.*;
+import static org.lwjgl.system.MemoryUtil.*;
 
 import static org.lwjgl.opengl.GL33C.*;
 
@@ -31,12 +32,17 @@ public class VertexBuffer extends HardwareBuffer {
                 break;
         }
         if (data != null)
-            glBufferData(GL_ARRAY_BUFFER, data, GL_usageHint);
+            nglBufferData(GL_ARRAY_BUFFER, size, memAddress(data), GL_usageHint);
         else if (size > 0) {
             glBufferData(GL_ARRAY_BUFFER, size, GL_usageHint);
         } else {
             System.out.println("VertexBuffer: If data is null, size must be > 0");
         }
+    }
+
+    public void setData(ByteBuffer data, long size) {
+        glBindVertexArray(m_VAOID);
+        nglBufferSubData(GL_VERTEX_ARRAY, 0, size, memAddress(data));
     }
 
     private void setVertexBufferToVertexArray() {

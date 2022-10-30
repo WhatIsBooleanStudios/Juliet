@@ -1,4 +1,4 @@
-package mclone.gfx;
+package mclone.gfx.OpenGL;
 
 public abstract class HardwareBuffer {
     enum UsageHints {

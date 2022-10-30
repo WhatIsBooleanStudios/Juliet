@@ -1,4 +1,4 @@
-package mclone.gfx;
+package mclone.gfx.OpenGL;
 
 import java.util.ArrayList;
 
