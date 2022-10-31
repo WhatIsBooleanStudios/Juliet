@@ -5,6 +5,17 @@ import java.io.FileReader;
 import java.io.FileWriter;
 
 public class Logger {
+
+    private static Logger m_logger = null;
+
+    public static Logger get() {
+        if (m_logger == null) {
+            m_logger = new Logger(true, "log.txt");
+        }
+
+        return m_logger;
+    }
+
     public Logger(boolean logToFile, String pathToFile) {
         this.m_LogToFile = logToFile;
         if (this.m_LogToFile)
@@ -43,22 +54,22 @@ public class Logger {
             }
 
             reader.close();
-
+            String className = obj == null ? "" : obj.getClass().getName();
             FileWriter writer = new FileWriter(file);
             String fileMsg = "\n\nLogging started at " + getTimestamp() + "\n-------------------------------";
             if (logType != null && msg != null)
                 switch (logType) {
                     case ERROR:
-                        fileMsg = "\nERROR " + getTimestamp() + " " + obj.getClass().getName() + " " + msg;
+                        fileMsg = "\nERROR " + getTimestamp() + " " + className + " " + msg;
                         break;
                     case INFO:
-                        fileMsg = "\nINFO  " + getTimestamp() + " " + obj.getClass().getName() + " " + msg;
+                        fileMsg = "\nINFO  " + getTimestamp() + " " + className + " " + msg;
                         break;
                     case TRACE:
-                        fileMsg = "\nTRACE " + getTimestamp() + " " + obj.getClass().getName() + " " + msg;
+                        fileMsg = "\nTRACE " + getTimestamp() + " " + className + " " + msg;
                         break;
                     case WARN:
-                        fileMsg = "\nWARN  " + getTimestamp() + " " + obj.getClass().getName() + " " + msg;
+                        fileMsg = "\nWARN  " + getTimestamp() + " " + className + " " + msg;
                         break;
                 }
             writer.write(current + fileMsg);
@@ -71,15 +82,15 @@ public class Logger {
     }
 
     private boolean handleMessage(Object obj, LogType logType, String msg) {
-        if(msg == null)
+        if (msg == null)
             return false;
-            
+
         switch (logType) {
             case ERROR:
                 System.out.print("\033[31;49;1mERROR\033[37;49;1m " + getTimestamp());
                 break;
             case INFO:
-                System.out.print("\0\033[32;49;1mINFO\033[37;49;1m  " + getTimestamp());
+                System.out.print("\033[32;49;1mINFO\033[37;49;1m  " + getTimestamp());
                 break;
             case TRACE:
                 System.out.print("\033[34;49;1mTRACE\033[37;49;1m " + getTimestamp());
@@ -95,7 +106,7 @@ public class Logger {
         System.out.print("\033[37;49m " + msg + "\033[0m\n");
 
         if (!msg.equals("file path error")) {
-            if(this.m_LogToFile)
+            if (this.m_LogToFile)
                 this.logToFile(obj, logType, msg);
             return true;
         } else
@@ -115,6 +126,19 @@ public class Logger {
         }
 
         if (handleMessage(obj, LogType.ERROR, msg))
+            return 0;
+
+        return 3;
+    }
+
+    public int error(String msg) {
+
+        if (msg == null || msg.equals("")) {
+            error("invalid message");
+            return 2;
+        }
+
+        if (handleMessage(null, LogType.ERROR, msg))
             return 0;
 
         return 3;

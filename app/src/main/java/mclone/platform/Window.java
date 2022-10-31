@@ -3,19 +3,27 @@ package mclone.platform;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.glfw.Callbacks.*;
 import static org.lwjgl.opengl.GL33.*;
+
+import mclone.Logging.Logger;
 import org.lwjgl.glfw.*;
 import org.joml.Vector2f;
 import org.lwjgl.system.MemoryStack;
+import static org.lwjgl.system.MemoryUtil.*;
 
-import java.nio.ByteBuffer;
 import java.nio.DoubleBuffer;
 
 public class Window {
     public static void initializeWindowSystem() {
-        if(!glfwInit()) {
-            System.out.println("Failed to initialize window system!");
-        }
-        GLFWErrorCallback.createPrint(System.err).set();
+        if (!glfwInit())
+            Logger.get().error("Failed to initialize window system!");
+
+        GLFWErrorCallback cb = new GLFWErrorCallback() {
+            @Override
+            public void invoke(int error, long description) {
+                Logger.get().error(this, "GLFW ERROR " + error + ": " + memUTF8(description));
+            }
+        };
+        glfwSetErrorCallback(cb);
     }
 
     public static void shutdownWindowSystem() {
@@ -32,7 +40,7 @@ public class Window {
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         m_window = glfwCreateWindow(width, height, title, fullscreen ? glfwGetPrimaryMonitor() : 0, 0);
-        if(m_window == 0) {
+        if (m_window == 0) {
             System.out.println("Failed to create window \"" + title + "\"!");
         }
     }
@@ -82,12 +90,11 @@ public class Window {
         int status = glfwGetMouseButton(m_window, button);
         return status == GLFW_RELEASE;
     }
-    
 
     public Vector2f getMousePosition() {
         Vector2f mousePosition = new Vector2f();
 
-        try(MemoryStack stack = MemoryStack.stackPush()) {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
             DoubleBuffer posX = stack.mallocDouble(1);
             DoubleBuffer posY = stack.mallocDouble(1);
 
