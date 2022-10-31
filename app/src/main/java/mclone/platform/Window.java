@@ -16,8 +16,8 @@ public class Window {
     public static void initializeWindowSystem() {
         if(!glfwInit())
             Logger.get().error("Failed to initialize window system!");
-            Logger.get().error("Failed to initialize window system!");
         
+
         GLFWErrorCallback cb = new GLFWErrorCallback() {
             @Override
             public void invoke(int error, long description) {
