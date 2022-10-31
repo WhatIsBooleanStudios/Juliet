@@ -9,7 +9,7 @@ import java.nio.IntBuffer;
 import static org.lwjgl.opengl.GL33C.*;
 
 public class Shader {
-    public class ShaderSource {
+    public static class ShaderSource {
         public ShaderSource(String vs, String fs) {
             m_vs = vs;
             m_fs = fs;
@@ -60,6 +60,7 @@ public class Shader {
                 Logger.get().error("SHADER COMPILE ERROR: " + glGetShaderInfoLog(shader));
                 return -1;
             } else {
+                System.out.println("Shader compilation success");
                 return shader;
             }
         }
@@ -75,6 +76,7 @@ public class Shader {
                 Logger.get().error("SHADER LINK ERROR: " + glGetProgramInfoLog(program));
                 return false;
             } else {
+                System.out.println("Shader linkage success");
                 return true;
             }
         }

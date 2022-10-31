@@ -4,23 +4,26 @@ import java.nio.ByteBuffer;
 
 import org.lwjgl.opengl.*;
 import static org.lwjgl.system.MemoryUtil.*;
+import java.nio.Buffer;
 
 import static org.lwjgl.opengl.GL33C.*;
 
 public class VertexBuffer extends HardwareBuffer {
-    public VertexBuffer(ByteBuffer data, long size, UsageHints hint, VertexBufferLayout layout) {
+    public VertexBuffer(Buffer data, long size, UsageHints hint, VertexBufferLayout layout) {
         m_layout = layout;
         m_maxSize = size;
 
         createVBO();
+        setInitializeVBOData(data, size, hint);
         createVAO();
+        setVertexBufferToVertexArray();
     }
 
     private void createVAO() {
         m_VAOID = glGenVertexArrays();
     }
 
-    private void setInitializeVBOData(ByteBuffer data, long size, UsageHints hint) {
+    private void setInitializeVBOData(Buffer data, long size, UsageHints hint) {
         glBindBuffer(GL_ARRAY_BUFFER, m_VBOID);
         int GL_usageHint = 0;
         switch (hint) {
@@ -40,14 +43,14 @@ public class VertexBuffer extends HardwareBuffer {
         }
     }
 
-    public void setData(ByteBuffer data, long size) {
+    public void setData(Buffer data, long size) {
         glBindVertexArray(m_VAOID);
         nglBufferSubData(GL_VERTEX_ARRAY, 0, size, memAddress(data));
     }
 
     private void setVertexBufferToVertexArray() {
         glBindVertexArray(m_VAOID);
-        glBindBuffer(GL_VERTEX_ARRAY, m_VBOID);
+        glBindBuffer(GL_ARRAY_BUFFER, m_VBOID);
 
         long offset = 0;
         for (int i = 0; i < m_layout.getNumAttributes(); i++) {
@@ -59,6 +62,7 @@ public class VertexBuffer extends HardwareBuffer {
                 type == ShaderPrimitiveUtil.ShaderPrimitiveType.INT16) {
                 glVertexAttribIPointer(i, attrib.getCount(), ShaderPrimitiveUtil.mapShaderTypeToGLType(type), m_layout.getStride(), offset);
             } else if(type == ShaderPrimitiveUtil.ShaderPrimitiveType.FLOAT32) {
+                System.out.println("stride: " + m_layout.getStride());
                 glVertexAttribPointer(i, attrib.getCount(), ShaderPrimitiveUtil.mapShaderTypeToGLType(type), false, m_layout.getStride(), offset);
             } else if(type == ShaderPrimitiveUtil.ShaderPrimitiveType.FLOAT64) {
                 System.out.println("OpenGL 3.3 does not support 64 bit floats in vertex arrays!");

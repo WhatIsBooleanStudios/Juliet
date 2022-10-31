@@ -56,5 +56,8 @@ application {
     // Define the main class for the application.
     mainClass = 'mclone.App'
 	if (OperatingSystem.current() == OperatingSystem.MAC_OS)
-    	applicationDefaultJvmArgs = ['-XstartOnFirstThread'];
+    	applicationDefaultJvmArgs = ['-XstartOnFirstThread', '-javaagent:' + project.rootDir + '/debug-util/lwjglx-debug-1.0.0.jar'];
+    else {
+        applicationDefaultJvmArgs = ['-javaagent:' + project.rootDir + '/debug-util/lwjglx-debug-1.0.0.jar']
+    }
 }

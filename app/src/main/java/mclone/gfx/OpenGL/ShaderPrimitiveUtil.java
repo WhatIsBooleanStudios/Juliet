@@ -17,12 +17,12 @@ public class ShaderPrimitiveUtil {
             case FLOAT32:
             case INT32:
             case UINT32:
-                return 32;
+                return 4;
             case FLOAT64:
-                return 64;
+                return 8;
             case INT16:
             case UINT16:
-                return 16;
+                return 2;
         }
 
         return -1;

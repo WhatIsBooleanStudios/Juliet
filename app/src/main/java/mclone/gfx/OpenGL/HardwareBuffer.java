@@ -3,7 +3,7 @@ package mclone.gfx.OpenGL;
 import static org.lwjgl.opengl.GL33C.*;
 
 public abstract class HardwareBuffer {
-    enum UsageHints {
+    public enum UsageHints {
         USAGE_DYNAMIC,
         USAGE_STATIC
     }

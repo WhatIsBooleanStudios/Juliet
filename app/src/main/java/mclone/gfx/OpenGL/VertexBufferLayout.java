@@ -3,7 +3,7 @@ package mclone.gfx.OpenGL;
 import java.util.ArrayList;
 
 public class VertexBufferLayout {
-    public class VertexAttribute {
+    public static class VertexAttribute {
         public VertexAttribute(ShaderPrimitiveUtil.ShaderPrimitiveType type, int count) {
             m_count = count;
             m_type = type;
@@ -40,6 +40,7 @@ public class VertexBufferLayout {
                 System.out.println("Vertex attribute at offset " + stride + " has an invalid value");
                 break;
             }
+            System.out.println("Size: " + size);
             stride += size;
         }
 
