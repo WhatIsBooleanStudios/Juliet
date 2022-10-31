@@ -5,6 +5,15 @@ import java.io.FileReader;
 import java.io.FileWriter;
 
 public class Logger {
+
+    private static Logger m_logger = null;
+    public static Logger get() {
+        if(m_logger == null) {
+            m_logger = new Logger(true, "log.txt");
+        }
+
+        return m_logger;
+    }
     public Logger(boolean logToFile, String pathToFile) {
         this.m_LogToFile = logToFile;
         if (this.m_LogToFile)
@@ -79,7 +88,7 @@ public class Logger {
                 System.out.print("\033[31;49;1mERROR\033[37;49;1m " + getTimestamp());
                 break;
             case INFO:
-                System.out.print("\0\033[32;49;1mINFO\033[37;49;1m  " + getTimestamp());
+                System.out.print("\033[32;49;1mINFO\033[37;49;1m  " + getTimestamp());
                 break;
             case TRACE:
                 System.out.print("\033[34;49;1mTRACE\033[37;49;1m " + getTimestamp());
