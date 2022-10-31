@@ -1,6 +1,6 @@
 package mclone;
 
-import mclone.platform.Window;
+import mclone.Platform.Window;
 
 import org.lwjgl.*;
 import org.lwjgl.opengl.*;

@@ -1,4 +1,4 @@
-package mclone.platform;
+package mclone.Platform;
 
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.glfw.Callbacks.*;
@@ -13,6 +13,17 @@ import static org.lwjgl.system.MemoryUtil.*;
 import java.nio.DoubleBuffer;
 
 public class Window {
+    public Window(String title, int width, int height, boolean fullscreen) {
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        windowHandle = glfwCreateWindow(width, height, title, fullscreen ? glfwGetPrimaryMonitor() : 0, 0);
+        if (windowHandle == 0) {
+            System.out.println("Failed to create window \"" + title + "\"!");
+        }
+    }
+
     public static void initializeWindowSystem() {
         if (!glfwInit())
             Logger.get().error("Failed to initialize window system!");
@@ -34,60 +45,49 @@ public class Window {
         glfwPollEvents();
     }
 
-    public Window(String title, int width, int height, boolean fullscreen) {
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-        glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-        glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-        glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-        m_window = glfwCreateWindow(width, height, title, fullscreen ? glfwGetPrimaryMonitor() : 0, 0);
-        if (m_window == 0) {
-            System.out.println("Failed to create window \"" + title + "\"!");
-        }
-    }
-
     public void setTitle(String title) {
-        glfwSetWindowTitle(m_window, title);
+        glfwSetWindowTitle(windowHandle, title);
     }
 
     public void swapBuffers() {
-        glfwSwapBuffers(m_window);
+        glfwSwapBuffers(windowHandle);
     }
 
     public void makeContextCurrent() {
-        glfwMakeContextCurrent(m_window);
+        glfwMakeContextCurrent(windowHandle);
     }
 
     public boolean shouldClose() {
-        return glfwWindowShouldClose(m_window);
+        return glfwWindowShouldClose(windowHandle);
     }
 
     public boolean keyPressed(int key) {
-        int status = glfwGetKey(m_window, key);
+        int status = glfwGetKey(windowHandle, key);
         return status == GLFW_PRESS || status == GLFW_REPEAT;
     }
 
     public boolean keyReleased(int key) {
-        int status = glfwGetKey(m_window, key);
+        int status = glfwGetKey(windowHandle, key);
         return status == GLFW_RELEASE;
     }
 
     public boolean keyJustPressed(int key) {
-        int status = glfwGetKey(m_window, key);
+        int status = glfwGetKey(windowHandle, key);
         return status == GLFW_PRESS;
     }
 
     public boolean mouseButtonPressed(int button) {
-        int status = glfwGetMouseButton(m_window, button);
+        int status = glfwGetMouseButton(windowHandle, button);
         return status == GLFW_PRESS || status == GLFW_REPEAT;
     }
 
     public boolean mouseButtonJustPressed(int button) {
-        int status = glfwGetMouseButton(m_window, button);
+        int status = glfwGetMouseButton(windowHandle, button);
         return status == GLFW_PRESS;
     }
 
     public boolean mouseButtonReleased(int button) {
-        int status = glfwGetMouseButton(m_window, button);
+        int status = glfwGetMouseButton(windowHandle, button);
         return status == GLFW_RELEASE;
     }
 
@@ -98,7 +98,7 @@ public class Window {
             DoubleBuffer posX = stack.mallocDouble(1);
             DoubleBuffer posY = stack.mallocDouble(1);
 
-            glfwGetCursorPos(m_window, posX, posY);
+            glfwGetCursorPos(windowHandle, posX, posY);
             mousePosition.set(posX.get(), posY.get());
         }
 
@@ -106,9 +106,9 @@ public class Window {
     }
 
     public void destruct() {
-        glfwFreeCallbacks(m_window);
-        glfwDestroyWindow(m_window);
+        glfwFreeCallbacks(windowHandle);
+        glfwDestroyWindow(windowHandle);
     }
 
-    private long m_window;
+    private long windowHandle = 0;
 }
