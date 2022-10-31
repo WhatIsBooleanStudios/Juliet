@@ -7,20 +7,30 @@ import mclone.platform.Window;
 
 import org.lwjgl.*;
 import org.lwjgl.opengl.*;
+
+import org.lwjgl.system.*;
+
+import mclone.Logging.Logger;
+
+import java.nio.*;
+
+import static org.lwjgl.glfw.Callbacks.*;
+
 import static org.lwjgl.glfw.GLFW.*;
 
 import static org.lwjgl.opengl.GL33.*;
 
 public class App {
-    public String getGreeting() {
-        return "Hello World!";
-    }
-
     // The window handle
     private Window m_window;
 
     public void run() {
         System.out.println("Hello LWJGL " + Version.getVersion() + "!");
+        Logger logger = new Logger(true, "log.txt");
+        logger.error(this, "This is an example error message");
+        logger.warn(this, "This is an example warn message");
+        logger.trace(this, "This is an example trace message");
+        logger.info(this, "This is an example info message");
 
         init();
         loop();
