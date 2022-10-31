@@ -26,7 +26,7 @@ public class App {
 
     public void run() {
         System.out.println("Hello LWJGL " + Version.getVersion() + "!");
-        Logger logger = new Logger(true, "log.txt");
+        Logger logger = Logger.get();
         logger.error(this, "This is an example error message");
         logger.warn(this, "This is an example warn message");
         logger.trace(this, "This is an example trace message");
