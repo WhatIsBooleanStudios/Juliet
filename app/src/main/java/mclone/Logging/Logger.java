@@ -7,13 +7,15 @@ import java.io.FileWriter;
 public class Logger {
 
     private static Logger m_logger = null;
+
     public static Logger get() {
-        if(m_logger == null) {
+        if (m_logger == null) {
             m_logger = new Logger(true, "log.txt");
         }
 
         return m_logger;
     }
+
     public Logger(boolean logToFile, String pathToFile) {
         this.m_LogToFile = logToFile;
         if (this.m_LogToFile)
@@ -80,9 +82,9 @@ public class Logger {
     }
 
     private boolean handleMessage(Object obj, LogType logType, String msg) {
-        if(msg == null)
+        if (msg == null)
             return false;
-            
+
         switch (logType) {
             case ERROR:
                 System.out.print("\033[31;49;1mERROR\033[37;49;1m " + getTimestamp());
@@ -104,7 +106,7 @@ public class Logger {
         System.out.print("\033[37;49m " + msg + "\033[0m\n");
 
         if (!msg.equals("file path error")) {
-            if(this.m_LogToFile)
+            if (this.m_LogToFile)
                 this.logToFile(obj, logType, msg);
             return true;
         } else
