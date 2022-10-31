@@ -52,22 +52,22 @@ public class Logger {
             }
 
             reader.close();
-
+            String className = obj == null ? "" : obj.getClass().getName();
             FileWriter writer = new FileWriter(file);
             String fileMsg = "\n\nLogging started at " + getTimestamp() + "\n-------------------------------";
             if (logType != null && msg != null)
                 switch (logType) {
                     case ERROR:
-                        fileMsg = "\nERROR " + getTimestamp() + " " + obj.getClass().getName() + " " + msg;
+                        fileMsg = "\nERROR " + getTimestamp() + " " + className + " " + msg;
                         break;
                     case INFO:
-                        fileMsg = "\nINFO  " + getTimestamp() + " " + obj.getClass().getName() + " " + msg;
+                        fileMsg = "\nINFO  " + getTimestamp() + " " + className + " " + msg;
                         break;
                     case TRACE:
-                        fileMsg = "\nTRACE " + getTimestamp() + " " + obj.getClass().getName() + " " + msg;
+                        fileMsg = "\nTRACE " + getTimestamp() + " " + className + " " + msg;
                         break;
                     case WARN:
-                        fileMsg = "\nWARN  " + getTimestamp() + " " + obj.getClass().getName() + " " + msg;
+                        fileMsg = "\nWARN  " + getTimestamp() + " " + className + " " + msg;
                         break;
                 }
             writer.write(current + fileMsg);
@@ -124,6 +124,19 @@ public class Logger {
         }
 
         if (handleMessage(obj, LogType.ERROR, msg))
+            return 0;
+
+        return 3;
+    }
+
+    public int error(String msg) {
+
+        if (msg == null || msg.equals("")) {
+            error("invalid message");
+            return 2;
+        }
+
+        if (handleMessage(null, LogType.ERROR, msg))
             return 0;
 
         return 3;

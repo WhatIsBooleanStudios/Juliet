@@ -10,14 +10,14 @@ import org.joml.Vector2f;
 import org.lwjgl.system.MemoryStack;
 import static org.lwjgl.system.MemoryUtil.*;
 
-import java.nio.ByteBuffer;
 import java.nio.DoubleBuffer;
 
 public class Window {
     public static void initializeWindowSystem() {
-        if(!glfwInit()) {
-            System.out.println("Failed to initialize window system!");
-        }
+        if(!glfwInit())
+            Logger.get().error("Failed to initialize window system!");
+        
+
         GLFWErrorCallback cb = new GLFWErrorCallback() {
             @Override
             public void invoke(int error, long description) {
