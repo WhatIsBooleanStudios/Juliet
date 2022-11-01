@@ -11,6 +11,7 @@ import mclone.Logging.Logger;
 import mclone.gfx.OpenGL.HardwareBuffer;
 import mclone.gfx.OpenGL.Shader;
 import mclone.gfx.OpenGL.VertexBuffer;
+import mclone.gfx.OpenGL.IndexBuffer;
 import mclone.gfx.OpenGL.VertexBufferLayout;
 import mclone.gfx.OpenGL.ShaderPrimitiveUtil.ShaderPrimitiveType;
 import mclone.gfx.OpenGL.VertexBufferLayout.VertexAttribute;
@@ -23,6 +24,7 @@ import java.lang.management.MemoryType;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.util.ArrayList;
 
 public class App {
@@ -67,7 +69,13 @@ public class App {
             float[] vertices = {
                 -0.5f, -0.5f, 0.0f,
                  0.5f, -0.5f, 0.0f,
-                 0.0f,  0.5f, 0.0f
+                 0.5f,  0.5f, 0.0f,
+                 -0.5f, 0.5f, 0.0f
+            };
+
+            int[] indices = {
+                0, 1, 2,
+                2, 3, 0
             };
 
             ArrayList<VertexAttribute> attributes = new ArrayList<>();
@@ -75,8 +83,13 @@ public class App {
             VertexBufferLayout vboLayout = new VertexBufferLayout(attributes);
             FloatBuffer fb = stack.mallocFloat(vertices.length);
             fb.put(vertices).flip();
+
+            IntBuffer ib = stack.mallocInt(6);
+            ib.put(indices);
+            ib.flip();
             
             VertexBuffer vbo = new VertexBuffer(fb, vertices.length * 4, HardwareBuffer.UsageHints.USAGE_STATIC, vboLayout);
+            IndexBuffer  ibo = new IndexBuffer(ib, indices.length * 4, HardwareBuffer.UsageHints.USAGE_STATIC);
 
             String vertexShaderSource = "#version 330 core\n" +
                 "layout (location = 0) in vec3 aPos;\n" +
@@ -108,7 +121,8 @@ public class App {
 
                 shader.bind();
                 vbo.bind();
-                glDrawArrays(GL_TRIANGLES, 0, 3);
+                ibo.bind();
+                glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
                 // glfwSwapBuffers(window); // swap the color buffers
                 m_window.swapBuffers();

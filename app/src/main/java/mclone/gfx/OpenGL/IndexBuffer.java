@@ -1,13 +1,14 @@
 package mclone.gfx.OpenGL;
 
 import java.nio.ByteBuffer;
+import java.nio.Buffer;
 
 import static org.lwjgl.opengl.GL33C.*;
 import static org.lwjgl.system.MemoryUtil.*;
 
-class IndexBuffer extends HardwareBuffer {
+public class IndexBuffer extends HardwareBuffer {
 
-	public IndexBuffer(ByteBuffer data, long size, UsageHints usage) {
+	public IndexBuffer(Buffer data, long size, UsageHints usage) {
         m_ID = glGenBuffers();
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ID);
         int GL_usageHint = usageHintToGLUsageHint(usage);
@@ -22,7 +23,7 @@ class IndexBuffer extends HardwareBuffer {
         m_maxSize = size;
     }
 
-    public void setData(ByteBuffer data, long size) {
+    public void setData(Buffer data, long size) {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ID);
         nglBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, size, memAddress(data));
     }
