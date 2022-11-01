@@ -67,10 +67,10 @@ public class App {
             glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
 
             float[] vertices = {
-                -0.5f, -0.5f, 0.0f,
-                 0.5f, -0.5f, 0.0f,
-                 0.5f,  0.5f, 0.0f,
-                 -0.5f, 0.5f, 0.0f
+                -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
+                 0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 0.0f,
+                 0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 1.0f,
+                 -0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f
             };
 
             int[] indices = {
@@ -79,6 +79,7 @@ public class App {
             };
 
             ArrayList<VertexAttribute> attributes = new ArrayList<>();
+            attributes.add(new VertexAttribute(ShaderPrimitiveType.FLOAT32, 3));
             attributes.add(new VertexAttribute(ShaderPrimitiveType.FLOAT32, 3));
             VertexBufferLayout vboLayout = new VertexBufferLayout(attributes);
             FloatBuffer fb = stack.mallocFloat(vertices.length);
@@ -93,15 +94,19 @@ public class App {
 
             String vertexShaderSource = "#version 330 core\n" +
                 "layout (location = 0) in vec3 aPos;\n" +
+                "layout (location = 1) in vec3 color;\n" +
+                "out vec3 oColor;\n" +
                 "void main()\n" +
                 "{\n" +
                 "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n" +
+                "   oColor = color;\n" +
                 "}\0";
             String fragmentShaderSource = "#version 330 core\n" +
                 "out vec4 FragColor;\n" +
+                "in vec3 oColor;\n" +
                 "void main()\n" +
                 "{\n" +
-                "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n" +
+                "   FragColor = vec4(oColor, 1.0f);\n" +
                 "}\n";
 
             Shader shader = new Shader(new Shader.ShaderSource(vertexShaderSource, fragmentShaderSource));
