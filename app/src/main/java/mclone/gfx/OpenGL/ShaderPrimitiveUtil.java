@@ -9,7 +9,14 @@ public class ShaderPrimitiveUtil {
         INT32,
         UINT32,
         INT16,
-        UINT16
+        UINT16,
+
+        VEC2,
+        VEC3,
+        VEC4,
+        MAT2,
+        MAT3,
+        MAT4
     }
 
     public static int getSizeOfType(ShaderPrimitiveType type) {
@@ -23,6 +30,18 @@ public class ShaderPrimitiveUtil {
             case INT16:
             case UINT16:
                 return 2;
+            case VEC2:
+                return 4 * 2;
+            case VEC3:
+                return 4 * 3;
+            case VEC4:
+                return 4 * 4;
+            case MAT2:
+                return 2 * 2 * 4;
+            case MAT3:
+                return 3 * 3 * 4;
+            case MAT4:
+                return 4 * 4 * 4;
         }
 
         return -1;
@@ -42,6 +61,18 @@ public class ShaderPrimitiveUtil {
                 return GL_SHORT;
             case UINT16:
                 return GL_UNSIGNED_SHORT;
+            case VEC2:
+                return GL_FLOAT_VEC2;
+            case VEC3:
+                return GL_FLOAT_VEC3;
+            case VEC4:
+                return GL_FLOAT_VEC4;
+            case MAT2:
+                return GL_FLOAT_MAT2;
+            case MAT3:
+                return GL_FLOAT_MAT3;
+            case MAT4:
+                return GL_FLOAT_MAT4;
         }
 
         return -1;

@@ -62,6 +62,20 @@ public class Window {
         return glfwWindowShouldClose(m_window);
     }
 
+    public int getWidth() {
+        int[] width = {0};
+        int[] height = {0};
+        glfwGetWindowSize(m_window, width, height);
+        return width[0];
+    }
+
+    public int getHeight() {
+        int[] width = {0};
+        int[] height = {0};
+        glfwGetWindowSize(m_window, width, height);
+        return height[0];
+    }
+
     public boolean keyPressed(int key) {
         int status = glfwGetKey(m_window, key);
         return status == GLFW_PRESS || status == GLFW_REPEAT;

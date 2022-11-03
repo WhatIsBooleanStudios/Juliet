@@ -2,6 +2,7 @@ package mclone;
 
 import mclone.platform.Window;
 
+import org.joml.Matrix4f;
 import org.lwjgl.*;
 import org.lwjgl.opengl.*;
 import org.lwjgl.system.Callback;
@@ -10,6 +11,7 @@ import org.lwjgl.system.MemoryStack;
 import mclone.Logging.Logger;
 import mclone.gfx.OpenGL.HardwareBuffer;
 import mclone.gfx.OpenGL.Shader;
+import mclone.gfx.OpenGL.ShaderPrimitiveUtil;
 import mclone.gfx.OpenGL.VertexBuffer;
 import mclone.gfx.OpenGL.IndexBuffer;
 import mclone.gfx.OpenGL.VertexBufferLayout;
@@ -96,9 +98,10 @@ public class App {
                 "layout (location = 0) in vec3 aPos;\n" +
                 "layout (location = 1) in vec3 color;\n" +
                 "out vec3 oColor;\n" +
+                "uniform mat4 transform;" +
                 "void main()\n" +
                 "{\n" +
-                "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n" +
+                "   gl_Position = transform * vec4(aPos.x, aPos.y, aPos.z, 1.0);\n" +
                 "   oColor = color;\n" +
                 "}\0";
             String fragmentShaderSource = "#version 330 core\n" +
@@ -109,7 +112,19 @@ public class App {
                 "   FragColor = vec4(oColor, 1.0f);\n" +
                 "}\n";
 
-            Shader shader = new Shader(new Shader.ShaderSource(vertexShaderSource, fragmentShaderSource));
+            Shader.ShaderBindingDescription.UniformDescription uniformDescription = new Shader.ShaderBindingDescription.UniformDescription("transform", ShaderPrimitiveUtil.ShaderPrimitiveType.MAT4);
+            ArrayList<Shader.ShaderBindingDescription.UniformDescription> uniforms = new ArrayList<>();
+            uniforms.add(uniformDescription);
+            Shader.ShaderBindingDescription bindingDescription = new Shader.ShaderBindingDescription(uniforms);
+            Shader shader = new Shader(new Shader.ShaderSource(vertexShaderSource, fragmentShaderSource), bindingDescription);
+
+            Matrix4f transform = new Matrix4f()
+                .identity()
+                .ortho2D(-1.0f * ((float)m_window.getWidth() / m_window.getHeight()), 
+                        1.0f * ((float)m_window.getWidth() / m_window.getHeight()),
+                        -1.0f, 1.0f);
+            transform.mul(new Matrix4f().identity().rotateZ(1.0f));
+            shader.setUniformMat4("transform", transform);
             // Run the rendering loop until the user has attempted to close
             // the window or has pressed the ESCAPE key.
             while (!m_window.shouldClose() && !m_window.keyPressed(GLFW_KEY_ESCAPE)) {
