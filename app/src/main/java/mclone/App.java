@@ -13,6 +13,7 @@ import mclone.gfx.OpenGL.GraphicsAPI;
 import mclone.gfx.OpenGL.HardwareBuffer;
 import mclone.gfx.OpenGL.Shader;
 import mclone.gfx.OpenGL.ShaderPrimitiveUtil;
+import mclone.gfx.OpenGL.Texture;
 import mclone.gfx.OpenGL.VertexBuffer;
 import mclone.gfx.OpenGL.IndexBuffer;
 import mclone.gfx.OpenGL.VertexBufferLayout;
@@ -70,10 +71,10 @@ public class App {
             glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
 
             float[] vertices = {
-                -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f,
-                 0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 0.0f,
-                 0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 1.0f,
-                 -0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f
+                -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+                 0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+                 0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+                 -0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f
             };
 
             int[] indices = {
@@ -84,6 +85,7 @@ public class App {
             ArrayList<VertexAttribute> attributes = new ArrayList<>();
             attributes.add(new VertexAttribute(ShaderPrimitiveType.FLOAT32, 3));
             attributes.add(new VertexAttribute(ShaderPrimitiveType.FLOAT32, 3));
+            attributes.add(new VertexAttribute(ShaderPrimitiveType.FLOAT32, 2));
             VertexBufferLayout vboLayout = new VertexBufferLayout(attributes);
             FloatBuffer fb = stack.mallocFloat(vertices.length);
             fb.put(vertices).flip();
@@ -97,20 +99,25 @@ public class App {
 
             String vertexShaderSource = "#version 330 core\n" +
                 "layout (location = 0) in vec3 aPos;\n" +
-                "layout (location = 1) in vec3 color;\n" +
-                "out vec3 oColor;\n" +
-                "uniform mat4 transform;" +
+                "layout (location = 1) in vec3 icolor;\n" +
+                "layout (location = 2) in vec2 itexCoord;\n" +
+                "out vec3 color;\n" +
+                "out vec2 texCoord;\n" +
+                "uniform mat4 transform;\n" +
                 "void main()\n" +
                 "{\n" +
                 "   gl_Position = transform * vec4(aPos.x, aPos.y, aPos.z, 1.0);\n" +
-                "   oColor = color;\n" +
+                "   color = icolor;\n" +
+                "   texCoord = itexCoord;\n" +
                 "}\0";
             String fragmentShaderSource = "#version 330 core\n" +
                 "out vec4 FragColor;\n" +
                 "in vec3 oColor;\n" +
+                "in vec2 texCoord;\n" +
+                "uniform sampler2D tex;\n" +
                 "void main()\n" +
                 "{\n" +
-                "   FragColor = vec4(oColor, 1.0f);\n" +
+                "   FragColor = texture(tex, texCoord);\n" +
                 "}\n";
 
             Shader.ShaderBindingDescription.UniformDescription uniformDescription = new Shader.ShaderBindingDescription.UniformDescription("transform", ShaderPrimitiveUtil.ShaderPrimitiveType.MAT4);
@@ -126,6 +133,10 @@ public class App {
                         -1.0f, 1.0f);
             transform.mul(new Matrix4f().identity().rotateZ(1.0f));
             shader.setUniformMat4("transform", transform);
+
+            Texture texture = new Texture("textures/waves.jpeg");
+
+            
             // Run the rendering loop until the user has attempted to close
             // the window or has pressed the ESCAPE key.
             while (!m_window.shouldClose() && !m_window.keyPressed(GLFW_KEY_ESCAPE)) {
@@ -140,6 +151,7 @@ public class App {
                 m_window.setTitle("Window! Cursor pos: " + m_window.getMousePosition().get(0) + " "
                         + m_window.getMousePosition().get(1));
 
+                texture.bind(0);
                 GraphicsAPI.drawIndexed(shader, vbo, ibo, 6);
 
                 // glfwSwapBuffers(window); // swap the color buffers
