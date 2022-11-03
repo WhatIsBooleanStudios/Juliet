@@ -9,6 +9,7 @@ import org.lwjgl.system.Callback;
 import org.lwjgl.system.MemoryStack;
 
 import mclone.Logging.Logger;
+import mclone.gfx.OpenGL.GraphicsAPI;
 import mclone.gfx.OpenGL.HardwareBuffer;
 import mclone.gfx.OpenGL.Shader;
 import mclone.gfx.OpenGL.ShaderPrimitiveUtil;
@@ -139,10 +140,7 @@ public class App {
                 m_window.setTitle("Window! Cursor pos: " + m_window.getMousePosition().get(0) + " "
                         + m_window.getMousePosition().get(1));
 
-                shader.bind();
-                vbo.bind();
-                ibo.bind();
-                glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+                GraphicsAPI.drawIndexed(shader, vbo, ibo, 6);
 
                 // glfwSwapBuffers(window); // swap the color buffers
                 m_window.swapBuffers();
