@@ -12,6 +12,7 @@ import mclone.Logging.Logger;
 import mclone.gfx.OpenGL.GraphicsAPI;
 import mclone.gfx.OpenGL.HardwareBuffer;
 import mclone.gfx.OpenGL.Shader;
+import mclone.gfx.OpenGL.ShaderBuilder;
 import mclone.gfx.OpenGL.ShaderPrimitiveUtil;
 import mclone.gfx.OpenGL.Texture;
 import mclone.gfx.OpenGL.VertexBuffer;
@@ -120,11 +121,11 @@ public class App {
                 "   FragColor = texture(tex, texCoord);\n" +
                 "}\n";
 
-            Shader.ShaderBindingDescription.UniformDescription uniformDescription = new Shader.ShaderBindingDescription.UniformDescription("transform", ShaderPrimitiveUtil.ShaderPrimitiveType.MAT4);
-            ArrayList<Shader.ShaderBindingDescription.UniformDescription> uniforms = new ArrayList<>();
-            uniforms.add(uniformDescription);
-            Shader.ShaderBindingDescription bindingDescription = new Shader.ShaderBindingDescription(uniforms);
-            Shader shader = new Shader(new Shader.ShaderSource(vertexShaderSource, fragmentShaderSource), bindingDescription);
+
+            ShaderBuilder shaderBuilder = new ShaderBuilder();
+            shaderBuilder.setShaderSource(vertexShaderSource, fragmentShaderSource);
+            shaderBuilder.addUniform("transform", ShaderPrimitiveUtil.ShaderPrimitiveType.MAT4);
+            Shader shader = shaderBuilder.get();
 
             Matrix4f transform = new Matrix4f()
                 .identity()
