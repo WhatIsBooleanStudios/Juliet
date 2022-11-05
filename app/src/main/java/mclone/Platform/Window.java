@@ -21,7 +21,7 @@ public class Window {
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         windowHandle = glfwCreateWindow(width, height, title, fullscreen ? glfwGetPrimaryMonitor() : 0, 0);
         if (windowHandle == 0) {
-            System.out.println("Failed to create window \"" + title + "\"!");
+            Logger.error("Window.new", this, "Failed to create window \"" + title + "\"!");
         }
     }
 
@@ -127,6 +127,11 @@ public class Window {
     public void dispose() {
         glfwFreeCallbacks(windowHandle);
         glfwDestroyWindow(windowHandle);
+    }
+
+    @Override
+    public String toString() {
+        return "Window(handle=" + windowHandle + ")";
     }
 
     private long windowHandle;

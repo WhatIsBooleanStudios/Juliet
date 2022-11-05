@@ -5,39 +5,38 @@ import java.util.ArrayList;
 public class VertexBufferLayout {
     public static class VertexAttribute {
         public VertexAttribute(ShaderPrimitiveUtil.ShaderPrimitiveType type, int count) {
-            m_count = count;
-            m_type = type;
+            this.count = count;
+            this.type = type;
         }
 
         public int getSize() {
-            return m_count * ShaderPrimitiveUtil.getSizeOfType(m_type);
+            return count * ShaderPrimitiveUtil.getSizeOfType(type);
         }
 
-        public ShaderPrimitiveUtil.ShaderPrimitiveType getType() { return m_type; }
-        public int getCount() { return m_count; }
+        public ShaderPrimitiveUtil.ShaderPrimitiveType getType() { return type; }
+        public int getCount() { return count; }
 
-        private ShaderPrimitiveUtil.ShaderPrimitiveType m_type;
-        private int m_count;
+        private ShaderPrimitiveUtil.ShaderPrimitiveType type;
+        private int count;
     }
 
     public VertexBufferLayout(ArrayList<VertexAttribute> attributes) {
-        m_attributes = attributes;
+        this.attributes = attributes;
     }
 
     public VertexAttribute getAttribute(int index) {
-        return m_attributes.get(index);
+        return attributes.get(index);
     }
 
     public int getNumAttributes() {
-        return m_attributes.size();
+        return attributes.size();
     }
 
     public int getStride() {
         int stride = 0;
-        for(VertexAttribute attribute : m_attributes) {
+        for(VertexAttribute attribute : attributes) {
             int size = attribute.getSize();
             if(size <= 0) {
-                System.out.println("Vertex attribute at offset " + stride + " has an invalid value");
                 break;
             }
             stride += size;
@@ -46,5 +45,5 @@ public class VertexBufferLayout {
         return stride;
     }
 
-    ArrayList<VertexAttribute> m_attributes;
+    ArrayList<VertexAttribute> attributes;
 }

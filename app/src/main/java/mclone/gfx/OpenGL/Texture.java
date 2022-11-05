@@ -1,5 +1,7 @@
 package mclone.gfx.OpenGL;
 
+import mclone.Logging.Logger;
+
 import java.nio.ByteBuffer;
 
 import static org.lwjgl.stb.STBImage.STBI_rgb_alpha;
@@ -20,7 +22,7 @@ public class Texture {
         ByteBuffer data = stbi_load(path, width, height, nrChannels, STBI_rgb_alpha);
         
         if(data == null || data.remaining() == 0) {
-            System.out.println("failed to load texture \"" + path + "\"");
+            Logger.error("Texture.new", this, "failed to load texture \"" + path + "\"");
             return;
         }
 
@@ -54,6 +56,24 @@ public class Texture {
     public void bind(int slot) {
         glActiveTexture(GL_TEXTURE0 + slot);
         bind();
+    }
+
+    public void dispose() {
+        glDeleteTextures(id);
+        id = -1;
+    }
+
+    @Override
+    public String toString() {
+        return "Texture(id=" + id + ")";
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+        if(id != -1) {
+            Logger.warn("Texture.finalize", this, "Garbage collection called but object not freed!");
+        }
     }
 
     public void unBind() {

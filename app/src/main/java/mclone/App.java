@@ -17,23 +17,20 @@ import static org.lwjgl.glfw.GLFW.*;
 
 import static org.lwjgl.opengl.GL33.*;
 
-import java.lang.management.MemoryType;
-import java.nio.Buffer;
-import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
 
 public class App {
     // The window handle
-    private Window m_window;
+    private Window window;
 
     public void run() {
 
         init();
         loop();
 
-        m_window.dispose();
+        window.dispose();
         Window.shutdownWindowSystem();
         Logger.shutdown();
     }
@@ -46,8 +43,8 @@ public class App {
         Logger.trace("App.init", this, "This is an example trace message");
         Logger.info("App.init", this, "This is an example info message");
         Window.initializeWindowSystem();
-        m_window = new Window("Window!", 720, 480, false);
-        m_window.makeContextCurrent();
+        window = new Window("Window!", 720, 480, false);
+        window.makeContextCurrent();
     }
 
     @Override
@@ -129,8 +126,8 @@ public class App {
 
             Matrix4f transform = new Matrix4f()
                 .identity()
-                .ortho2D(-((float)m_window.getWidth() / m_window.getHeight()),
-                        ((float)m_window.getWidth() / m_window.getHeight()),
+                .ortho2D(-((float) window.getWidth() / window.getHeight()),
+                        ((float) window.getWidth() / window.getHeight()),
                         -1.0f, 1.0f);
 
             UniformBuffer ubo = new UniformBuffer(null, 64, HardwareBuffer.UsageHints.USAGE_DYNAMIC);
@@ -140,13 +137,13 @@ public class App {
             
             // Run the rendering loop until the user has attempted to close
             // the window or has pressed the ESCAPE key.
-            while (!m_window.shouldClose() && !m_window.keyPressed(GLFW_KEY_ESCAPE)) {
+            while (!window.shouldClose() && !window.keyPressed(GLFW_KEY_ESCAPE)) {
                 try(MemoryStack loopStack = MemoryStack.stackPush()) {
                     GraphicsAPI.setClearColor(0.0f, 0.0f, 0.0f, 1.0f);
                     GraphicsAPI.clear();
 
-                    m_window.setTitle("Window! Cursor pos: " + m_window.getMousePosition().get(0) + " "
-                        + m_window.getMousePosition().get(1));
+                    window.setTitle("Window! Cursor pos: " + window.getMousePosition().get(0) + " "
+                        + window.getMousePosition().get(1));
 
                     transform.mul(new Matrix4f().identity().rotateZ((float) (2 * Math.PI * (1 / 60.0))));
 
@@ -157,7 +154,7 @@ public class App {
                     shader.setUniformBuffer("Matrices", 0);
                     GraphicsAPI.drawIndexed(shader, vbo, ibo, 6);
 
-                    m_window.swapBuffers();
+                    window.swapBuffers();
 
                     Window.windowSystemPollEvents();
                 }
@@ -167,6 +164,7 @@ public class App {
             vbo.dispose();
             ubo.dispose();
             shader.dispose();
+            texture.dispose();
         }
 
 

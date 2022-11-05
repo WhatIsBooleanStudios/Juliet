@@ -1,5 +1,7 @@
 package mclone.gfx.OpenGL;
 
+import mclone.Logging.Logger;
+
 import java.nio.Buffer;
 
 import static org.lwjgl.system.MemoryUtil.*;
@@ -15,7 +17,7 @@ public class UniformBuffer extends HardwareBuffer {
         } else if(size > 0) {
             glBufferData(GL_UNIFORM_BUFFER, size, GL_Usage);
         } else {
-            System.out.println("Buffer must be non-null and have contents if size <= 0 in UniformBuffer");
+            Logger.error("UniformBuffer.new", this, "Buffer must be non-null and have contents if size <= 0 in UniformBuffer");
         }
 
         maxSize = size;
@@ -24,7 +26,7 @@ public class UniformBuffer extends HardwareBuffer {
     public void setData(Buffer data, long size) {
         bind();
         if(size > maxSize) {
-            System.out.println("uniform buffer is too small for a data size of " + size);
+            Logger.error("UniformBuffer.setData", this, "Uniform buffer is too small for a data size of " + size);
             return;
         }
         nglBufferSubData(GL_UNIFORM_BUFFER, 0, size, memAddress(data));
@@ -53,7 +55,21 @@ public class UniformBuffer extends HardwareBuffer {
 	@Override
 	public void dispose() {
         glDeleteBuffers(id);
+        id = 0;
 	}
+
+    @Override
+    public String toString() {
+        return "UniformBuffer(id=" + id + ")";
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+        if(id != 0) {
+            Logger.warn("UniformBuffer.finalize", this, "Garbage collection called but object not disposed.");
+        }
+    }
 
     private long maxSize = 0;
     private int id;

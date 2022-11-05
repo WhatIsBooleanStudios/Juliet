@@ -1,6 +1,7 @@
 package mclone.gfx.OpenGL;
 
-import java.nio.ByteBuffer;
+import mclone.Logging.Logger;
+
 import java.nio.Buffer;
 
 import static org.lwjgl.opengl.GL33C.*;
@@ -9,33 +10,37 @@ import static org.lwjgl.system.MemoryUtil.*;
 public class IndexBuffer extends HardwareBuffer {
 
 	public IndexBuffer(Buffer data, long size, UsageHints usage) {
-        m_ID = glGenBuffers();
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ID);
+        id = glGenBuffers();
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, id);
         int GL_usageHint = usageHintToGLUsageHint(usage);
         if(data != null) {
             nglBufferData(GL_ELEMENT_ARRAY_BUFFER, size, memAddress(data), GL_usageHint);
         } else if(size > 0) {
             glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, GL_usageHint);
         } else {
-            System.out.println("IndexBuffer: if data is null then size must be greater than 0");
+            Logger.error("IndexBuffer.new", this, "If data is null then size must be greater than 0");
         }
 
-        m_maxSize = size;
+        maxSize = size;
     }
 
     public void setData(Buffer data, long size) {
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ID);
+        if(size > maxSize) {
+            Logger.error("IndexBuffer.setData", this, "Data size must be less than maximum size!");
+            return;
+        }
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, id);
         nglBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, size, memAddress(data));
     }
 
     @Override
     public void bind() {
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ID);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, id);
     }
 
     @Override
     public long getMaxSize() {
-        return m_maxSize;
+        return maxSize;
     }
 
     @Override
@@ -45,10 +50,24 @@ public class IndexBuffer extends HardwareBuffer {
 
     @Override
     public void dispose() {
-        glDeleteBuffers(m_ID);
+        glDeleteBuffers(id);
+        id = 0;
     }
 
-    private int m_ID = 0;
-    private long m_maxSize;
+    @Override
+    public String toString() {
+        return "IndexBuffer(id=" + id + ")";
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        super.finalize();
+        if(id != 0) {
+            Logger.warn("IndexBuffer.finalize", this, "Garbage collection called but object not freed!");
+        }
+    }
+
+    private int id = 0;
+    private long maxSize;
 
 }
