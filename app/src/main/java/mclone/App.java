@@ -123,9 +123,9 @@ public class App {
 
 
             ShaderBuilder shaderBuilder = new ShaderBuilder();
-            shaderBuilder.setShaderSource(vertexShaderSource, fragmentShaderSource);
+            shaderBuilder.setShaderSource("basicVS.glsl", vertexShaderSource, "basicFS.glsl", fragmentShaderSource);
             shaderBuilder.addUniformBuffer("Matrices");
-            Shader shader = shaderBuilder.get();
+            Shader shader = shaderBuilder.createShader("BasicShader");
 
             Matrix4f transform = new Matrix4f()
                 .identity()

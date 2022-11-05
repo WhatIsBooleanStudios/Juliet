@@ -1,7 +1,6 @@
 package mclone.gfx.OpenGL;
 
 import org.joml.Matrix2f;
-import org.joml.Matrix3d;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector2f;
@@ -16,7 +15,6 @@ import mclone.gfx.OpenGL.ShaderPrimitiveUtil.ShaderPrimitiveType;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.io.Serializable;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
@@ -25,16 +23,22 @@ import static org.lwjgl.opengl.GL33C.*;
 public class Shader {
 
     public static class ShaderSource {
-        public ShaderSource(String vs, String fs) {
-            m_vs = vs;
-            m_fs = fs;
+        public ShaderSource(String vertexShaderName, String vs, String fragmentShaderName, String fs) {
+            this.vs = vs;
+            this.fs = fs;
+            this.vsName = vertexShaderName;
+            this.fsName = fragmentShaderName;
         }
 
-        public String getVS() { return m_vs; }
-        public String getFS() { return m_fs; }
+        public String getVS() { return vs; }
+        public String getVsName() { return vsName; }
+        public String getFS() { return fs; }
+        public String getFsName() { return fsName; }
 
-        private String m_vs;
-        private String m_fs;
+        private String vs;
+        private String vsName;
+        private String fs;
+        private String fsName;
     }
 
     public static class ShaderBindingDescription {
@@ -95,30 +99,32 @@ public class Shader {
     }
 
 
-    public Shader(ShaderSource src, ShaderBindingDescription bindingDescription) {
-        m_ID = glCreateProgram();
-        int vs = compileShader(GL_VERTEX_SHADER, src.getVS());
-        int fs = compileShader(GL_FRAGMENT_SHADER, src.getFS());
+    public Shader(String shaderName, ShaderSource src, ShaderBindingDescription bindingDescription) {
+        id = glCreateProgram();
+        this.name = shaderName;
 
-        glAttachShader(m_ID, vs);
-        glAttachShader(m_ID, fs);
-        linkProgram(m_ID);
+        int vs = compileShader(src.getVsName(), GL_VERTEX_SHADER, src.getVS());
+        int fs = compileShader(src.getFsName(), GL_FRAGMENT_SHADER, src.getFS());
+
+        glAttachShader(id, vs);
+        glAttachShader(id, fs);
+        linkProgram(id);
 
         glDeleteShader(vs);
         glDeleteShader(fs);
 
         for(UniformDescription description : bindingDescription.uniforms) {
-            int location = glGetUniformLocation(m_ID, description.name);
+            int location = glGetUniformLocation(id, description.name);
             if(location < 0) {
-                System.out.println("failed to find uniform!");
+                Logger.error("Shader.new", this, "Cannot find uniform \"" + description.name + "\"");
             }
             uniformLocationMap.put(description, location);
         }
 
         for(UniformBufferDescription description : bindingDescription.uniformBuffers) {
-            int blockIndex = glGetUniformBlockIndex(m_ID, description.name);
+            int blockIndex = glGetUniformBlockIndex(id, description.name);
             if(blockIndex < 0) {
-                System.out.println("failed to find uniform buffer block index for ubo \"" + description.name + "\"");
+                Logger.error("Shader.new", this, "Failed to find uniform buffer block index for ubo \"" + description.name + "\"");
                 continue;
             }
             uniformBufferBlockIndexMap.put(description, blockIndex);
@@ -126,7 +132,7 @@ public class Shader {
     }
 
     public void bind() {
-        glUseProgram(m_ID);
+        glUseProgram(id);
     }
 
     public void unBind() {
@@ -134,24 +140,24 @@ public class Shader {
     }
 
     public void dispose() {
-        glDeleteProgram(m_ID);
+        glDeleteProgram( id);
     }
 
     public void setUniformBuffer(String name, int bindingPoint) {
         bind();
         int blockIndex = uniformBufferBlockIndexMap.getOrDefault(new UniformBufferDescription(name), -1);
         if(blockIndex < 0) {
-            System.out.println("failed to find block index for uniform buffer \"" + name + "\"");
+            Logger.error("Shader.setUniformBuffer", this, "Failed to find uniform buffer block index for ubo \"" + name + "\"");
             return;
         }
-        glUniformBlockBinding(m_ID, blockIndex, bindingPoint);
+        glUniformBlockBinding(id, blockIndex, bindingPoint);
     }
 
     public void setUniformFloat(String name, float value) {
         bind();
         UniformDescription description = new UniformDescription(name, ShaderPrimitiveType.FLOAT32);
         if(!uniformLocationMap.containsKey(description)) {
-            System.out.println("Shader does not contain the float uniform \"" + name + "\"");
+            Logger.error("Shader.setUniformFloat", this, "Shader does not contain the float uniform \"" + name + "\"");
             return;
         }
 
@@ -163,7 +169,7 @@ public class Shader {
         bind();
         UniformDescription description = new UniformDescription(name, ShaderPrimitiveType.INT32);
         if(!uniformLocationMap.containsKey(description)) {
-            System.out.println("Shader does not contain the integer uniform \"" + name + "\"");
+            Logger.error("Shader.setUniformInt", this, "Shader does not contain the integer uniform \"" + name + "\"");
             return;
         }
 
@@ -175,7 +181,7 @@ public class Shader {
         bind();
         UniformDescription description = new UniformDescription(name, ShaderPrimitiveType.UINT32);
         if(!uniformLocationMap.containsKey(description)) {
-            System.out.println("Shader does not contain the unsigned integer uniform \"" + name + "\"");
+            Logger.error("setUniformUint", this, "Shader does not contain the unsigned integer uniform \"" + name + "\"");
             return;
         }
 
@@ -188,7 +194,7 @@ public class Shader {
         try(MemoryStack stack = MemoryStack.stackPush()) {
             UniformDescription description = new UniformDescription(name, ShaderPrimitiveType.VEC2);
             if(!uniformLocationMap.containsKey(description)) {
-                System.out.println("Shader does not contain the vector2f uniform \"" + name + "\"");
+                Logger.error("Shader.setUniformVec2", this, "Shader does not contain the vector2f uniform \"" + name + "\"");
                 return;
             }
 
@@ -204,7 +210,7 @@ public class Shader {
         try(MemoryStack stack = MemoryStack.stackPush()) {
             UniformDescription description = new UniformDescription(name, ShaderPrimitiveType.VEC3);
             if(!uniformLocationMap.containsKey(description)) {
-                System.out.println("Shader does not contain the vector3f uniform \"" + name + "\"");
+                Logger.error("Shader.setUniformVec3" , this,"Shader does not contain the vector3f uniform \"" + name + "\"");
                 return;
             }
 
@@ -219,7 +225,7 @@ public class Shader {
         try(MemoryStack stack = MemoryStack.stackPush()) {
             UniformDescription description = new UniformDescription(name, ShaderPrimitiveType.VEC4);
             if(!uniformLocationMap.containsKey(description)) {
-                System.out.println("Shader does not contain the vector4f uniform \"" + name + "\"");
+                Logger.error("Shader.setUniformVec4", this, "Shader does not contain the vector4f uniform \"" + name + "\"");
                 return;
             }
 
@@ -234,7 +240,7 @@ public class Shader {
         try(MemoryStack stack = MemoryStack.stackPush()) {
             UniformDescription description = new UniformDescription(name, ShaderPrimitiveType.MAT2);
             if(!uniformLocationMap.containsKey(description)) {
-                System.out.println("Shader does not contain the matrix2f uniform \"" + name + "\"");
+                Logger.error("Shader.setUniformMat2", this, "Shader does not contain the matrix2f uniform \"" + name + "\"");
                 return;
             }
 
@@ -249,7 +255,7 @@ public class Shader {
         try(MemoryStack stack = MemoryStack.stackPush()) {
             UniformDescription description = new UniformDescription(name, ShaderPrimitiveType.MAT3);
             if(!uniformLocationMap.containsKey(description)) {
-                System.out.println("Shader does not contain the matrix3f uniform \"" + name + "\"");
+                Logger.error("Shader.setUniformMat3", this, "Shader does not contain the matrix3f uniform \"" + name + "\"");
                 return;
             }
 
@@ -264,7 +270,7 @@ public class Shader {
         try(MemoryStack stack = MemoryStack.stackPush()) {
             UniformDescription description = new UniformDescription(name, ShaderPrimitiveType.MAT4);
             if(!uniformLocationMap.containsKey(description)) {
-                System.out.println("Shader does not contain the matrix4f uniform \"" + name + "\"");
+                Logger.error("Shader.setUniformMat4", this, "Shader does not contain the matrix4f uniform \"" + name + "\"");
                 return;
             }
 
@@ -272,9 +278,14 @@ public class Shader {
             FloatBuffer buffer = stack.mallocFloat(16);
             glUniformMatrix4fv(location, false, value.get(buffer));
         }
-    } 
+    }
 
-    private int compileShader(int type, String src) {
+    @Override
+    public String toString() {
+        return "mclone.OpenGL.Shader(\"" + name + "\")";
+    }
+
+    private int compileShader(String name, int type, String src) {
         int shader = glCreateShader(type);
         glShaderSource(shader, src);
         glCompileShader(shader);
@@ -283,10 +294,9 @@ public class Shader {
             IntBuffer success = stack.mallocInt(1);
             glGetShaderiv(shader, GL_COMPILE_STATUS, success);
             if(success.get() <= 0) {
-                Logger.error("SHADER COMPILE ERROR: " + glGetShaderInfoLog(shader));
+                Logger.error("Shader.compileShader", this, "SHADER COMPILE ERROR@\"" + name + "\":\n" + glGetShaderInfoLog(shader));
                 return -1;
             } else {
-                System.out.println("Shader compilation success");
                 return shader;
             }
         }
@@ -299,16 +309,16 @@ public class Shader {
             IntBuffer success = stack.mallocInt(1);
             glGetProgramiv(program, GL_LINK_STATUS, success);
             if(success.get() <= 0) {
-                Logger.error("SHADER LINK ERROR: " + glGetProgramInfoLog(program));
+                Logger.error("Shader.linkProgram", this, "SHADER LINK ERROR:\n" + glGetProgramInfoLog(program));
                 return false;
             } else {
-                System.out.println("Shader linkage success");
                 return true;
             }
         }
     }
 
-    int m_ID;
+    private int id;
+    private String name;
 
     HashMap<UniformDescription, Integer> uniformLocationMap = new HashMap<>();
     HashMap<UniformBufferDescription, Integer> uniformBufferBlockIndexMap = new HashMap<>();

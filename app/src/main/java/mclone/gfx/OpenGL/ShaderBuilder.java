@@ -6,8 +6,8 @@ import static mclone.gfx.OpenGL.Shader.ShaderBindingDescription;
 public class ShaderBuilder {
     public ShaderBuilder() {}
 
-    public void setShaderSource(String vertexShader, String fragmentShader) {
-        shaderSource = new Shader.ShaderSource(vertexShader, fragmentShader);
+    public void setShaderSource(String vertexShaderName, String vertexShader, String fragmentShaderName, String fragmentShader) {
+        shaderSource = new Shader.ShaderSource(vertexShaderName, vertexShader, fragmentShaderName,fragmentShader);
     }
 
     public void addUniform(String name, ShaderPrimitiveUtil.ShaderPrimitiveType type) {
@@ -18,9 +18,9 @@ public class ShaderBuilder {
         uniformBufferDescriptions.add(new ShaderBindingDescription.UniformBufferDescription(name));
     }
 
-    public Shader get() {
+    public Shader createShader(String name) {
         ShaderBindingDescription description = new ShaderBindingDescription(uniformDescriptions, uniformBufferDescriptions);
-        return new Shader(shaderSource, description);
+        return new Shader(name, shaderSource, description);
     }
 
     private ArrayList<Shader.ShaderBindingDescription.UniformDescription> uniformDescriptions = 
