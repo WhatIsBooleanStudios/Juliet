@@ -26,13 +26,14 @@ public class Window {
     }
 
     public static void initializeWindowSystem() {
+        Logger.info("Window.initializeWindowSystem", "initializing window system!");
         if (!glfwInit())
-            Logger.get().error("Failed to initialize window system!");
+            Logger.error("Window.initializeWindowSystem", "Failed to initialize window system!");
 
         GLFWErrorCallback cb = new GLFWErrorCallback() {
             @Override
             public void invoke(int error, long description) {
-                Logger.get().error(this, "GLFW ERROR " + error + ": " + memUTF8(description));
+                Logger.error("GLFWErrorCallback.invoke", this, "error #" + error + ": " + memUTF8(description));
             }
         };
         glfwSetErrorCallback(cb);
@@ -128,5 +129,5 @@ public class Window {
         glfwDestroyWindow(windowHandle);
     }
 
-    private long windowHandle = 0;
+    private long windowHandle;
 }

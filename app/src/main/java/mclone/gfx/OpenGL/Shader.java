@@ -283,7 +283,7 @@ public class Shader {
             IntBuffer success = stack.mallocInt(1);
             glGetShaderiv(shader, GL_COMPILE_STATUS, success);
             if(success.get() <= 0) {
-                Logger.get().error("SHADER COMPILE ERROR: " + glGetShaderInfoLog(shader));
+                Logger.error("SHADER COMPILE ERROR: " + glGetShaderInfoLog(shader));
                 return -1;
             } else {
                 System.out.println("Shader compilation success");
@@ -299,7 +299,7 @@ public class Shader {
             IntBuffer success = stack.mallocInt(1);
             glGetProgramiv(program, GL_LINK_STATUS, success);
             if(success.get() <= 0) {
-                Logger.get().error("SHADER LINK ERROR: " + glGetProgramInfoLog(program));
+                Logger.error("SHADER LINK ERROR: " + glGetProgramInfoLog(program));
                 return false;
             } else {
                 System.out.println("Shader linkage success");

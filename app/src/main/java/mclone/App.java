@@ -29,24 +29,30 @@ public class App {
     private Window m_window;
 
     public void run() {
-        System.out.println("Hello LWJGL " + Version.getVersion() + "!");
-        Logger logger = Logger.get();
-        logger.error(this, "This is an example error message");
-        logger.warn(this, "This is an example warn message");
-        logger.trace(this, "This is an example trace message");
-        logger.info(this, "This is an example info message");
 
         init();
         loop();
 
         m_window.dispose();
         Window.shutdownWindowSystem();
+        Logger.shutdown();
     }
 
     private void init() {
+        Logger.initialize(true, "log.txt");
+        Logger.info(this, "LWJGL VERSION " + Version.getVersion());
+        Logger.error("App.init", this, "This is an example error message");
+        Logger.warn("App.init", this, "This is an example warn message");
+        Logger.trace("App.init", this, "This is an example trace message");
+        Logger.info("App.init", this, "This is an example info message");
         Window.initializeWindowSystem();
         m_window = new Window("Window!", 720, 480, false);
         m_window.makeContextCurrent();
+    }
+
+    @Override
+    public String toString() {
+        return "mclone.App";
     }
 
     private void loop() {
@@ -118,7 +124,6 @@ public class App {
 
             ShaderBuilder shaderBuilder = new ShaderBuilder();
             shaderBuilder.setShaderSource(vertexShaderSource, fragmentShaderSource);
-            //shaderBuilder.addUniform("transform", ShaderPrimitiveUtil.ShaderPrimitiveType.MAT4);
             shaderBuilder.addUniformBuffer("Matrices");
             Shader shader = shaderBuilder.get();
 
@@ -163,6 +168,8 @@ public class App {
             ubo.dispose();
             shader.dispose();
         }
+
+
     }
 
     public static void main(String[] args) {
