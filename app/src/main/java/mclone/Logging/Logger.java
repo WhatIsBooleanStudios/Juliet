@@ -35,6 +35,11 @@ public class Logger {
         INFO
     }
 
+    public static void flush() {
+        System.out.flush();
+        fileOutputStream.flush();
+    }
+
     private static String getTimestamp() {
         return "[" + java.time.LocalTime.now().getHour() + ":"
                 + java.time.LocalTime.now().getMinute() + ":"

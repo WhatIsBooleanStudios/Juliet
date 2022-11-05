@@ -5,7 +5,6 @@ import mclone.Platform.Window;
 
 import org.joml.Matrix4f;
 import org.lwjgl.*;
-import org.lwjgl.opengl.*;
 import org.lwjgl.system.Callback;
 import org.lwjgl.system.MemoryStack;
 
@@ -15,8 +14,7 @@ import mclone.gfx.OpenGL.VertexBufferLayout.VertexAttribute;
 
 import static org.lwjgl.glfw.GLFW.*;
 
-import static org.lwjgl.opengl.GL33.*;
-
+import java.awt.*;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
@@ -30,6 +28,7 @@ public class App {
         init();
         loop();
 
+        GraphicsAPI.shutdown();
         window.dispose();
         Window.shutdownWindowSystem();
         Logger.shutdown();
@@ -45,6 +44,7 @@ public class App {
         Window.initializeWindowSystem();
         window = new Window("Window!", 720, 480, false);
         window.makeContextCurrent();
+        GraphicsAPI.initialize();
     }
 
     @Override
@@ -59,12 +59,8 @@ public class App {
         // creates the GLCapabilities instance and makes the OpenGL
         // bindings available for use.
         try(MemoryStack stack = MemoryStack.stackPush()) {
-            GL.createCapabilities();
-            Callback cb = GLUtil.setupDebugMessageCallback(System.out);
 
             // Set the clear color
-
-            glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
 
             float[] vertices = {
                 -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,

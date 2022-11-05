@@ -1,8 +1,21 @@
 package mclone.gfx.OpenGL;
 
+import org.lwjgl.opengl.GL;
+import org.lwjgl.opengl.GLUtil;
+import org.lwjgl.system.Callback;
+
 import static org.lwjgl.opengl.GL33C.*;
 
 public class GraphicsAPI {
+    public static void initialize() {
+        GL.createCapabilities();
+        GLUtil.setupDebugMessageCallback(System.out);
+    }
+
+    public static void shutdown() {
+        Callback debugCallback = GLUtil.setupDebugMessageCallback();
+        if(debugCallback != null) debugCallback.free();
+    }
     public static void setClearColor(float r, float g, float b, float a) {
         glClearColor(r, g, b, a);
     }
