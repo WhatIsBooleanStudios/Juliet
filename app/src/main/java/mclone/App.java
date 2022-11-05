@@ -1,5 +1,6 @@
 package mclone;
 
+import mclone.gfx.OpenGL.*;
 import mclone.platform.Window;
 
 import org.joml.Matrix4f;
@@ -9,15 +10,6 @@ import org.lwjgl.system.Callback;
 import org.lwjgl.system.MemoryStack;
 
 import mclone.Logging.Logger;
-import mclone.gfx.OpenGL.GraphicsAPI;
-import mclone.gfx.OpenGL.HardwareBuffer;
-import mclone.gfx.OpenGL.Shader;
-import mclone.gfx.OpenGL.ShaderBuilder;
-import mclone.gfx.OpenGL.ShaderPrimitiveUtil;
-import mclone.gfx.OpenGL.Texture;
-import mclone.gfx.OpenGL.VertexBuffer;
-import mclone.gfx.OpenGL.IndexBuffer;
-import mclone.gfx.OpenGL.VertexBufferLayout;
 import mclone.gfx.OpenGL.ShaderPrimitiveUtil.ShaderPrimitiveType;
 import mclone.gfx.OpenGL.VertexBufferLayout.VertexAttribute;
 
@@ -104,7 +96,9 @@ public class App {
                 "layout (location = 2) in vec2 itexCoord;\n" +
                 "out vec3 color;\n" +
                 "out vec2 texCoord;\n" +
-                "uniform mat4 transform;\n" +
+                "layout (std140) uniform Matrices {\n" +
+                "    mat4 transform;\n" +
+                "};\n" +
                 "void main()\n" +
                 "{\n" +
                 "   gl_Position = transform * vec4(aPos.x, aPos.y, aPos.z, 1.0);\n" +
@@ -124,7 +118,8 @@ public class App {
 
             ShaderBuilder shaderBuilder = new ShaderBuilder();
             shaderBuilder.setShaderSource(vertexShaderSource, fragmentShaderSource);
-            shaderBuilder.addUniform("transform", ShaderPrimitiveUtil.ShaderPrimitiveType.MAT4);
+            //shaderBuilder.addUniform("transform", ShaderPrimitiveUtil.ShaderPrimitiveType.MAT4);
+            shaderBuilder.addUniformBuffer("Matrices");
             Shader shader = shaderBuilder.get();
 
             Matrix4f transform = new Matrix4f()
@@ -132,8 +127,8 @@ public class App {
                 .ortho2D(-1.0f * ((float)m_window.getWidth() / m_window.getHeight()), 
                         1.0f * ((float)m_window.getWidth() / m_window.getHeight()),
                         -1.0f, 1.0f);
-            transform.mul(new Matrix4f().identity().rotateZ(1.0f));
-            shader.setUniformMat4("transform", transform);
+
+            UniformBuffer ubo = new UniformBuffer(null, 64, HardwareBuffer.UsageHints.USAGE_DYNAMIC);
 
             Texture texture = new Texture("textures/waves.jpeg");
 
@@ -141,30 +136,40 @@ public class App {
             // Run the rendering loop until the user has attempted to close
             // the window or has pressed the ESCAPE key.
             while (!m_window.shouldClose() && !m_window.keyPressed(GLFW_KEY_ESCAPE)) {
-                if (m_window.mouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT)) {
-                    glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
-                } else if (m_window.mouseButtonReleased(GLFW_MOUSE_BUTTON_LEFT)) {
-                    glClearColor(1.0f, 1.0f, 0.0f, 1.0f);
-                } else {
-                    glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
-                }
-                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
-                m_window.setTitle("Window! Cursor pos: " + m_window.getMousePosition().get(0) + " "
+                try(MemoryStack loopStack = MemoryStack.stackPush()) {
+                    if (m_window.mouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT)) {
+                        glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
+                    } else if (m_window.mouseButtonReleased(GLFW_MOUSE_BUTTON_LEFT)) {
+                        glClearColor(1.0f, 1.0f, 0.0f, 1.0f);
+                    } else {
+                        glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+                    }
+                    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
+                    m_window.setTitle("Window! Cursor pos: " + m_window.getMousePosition().get(0) + " "
                         + m_window.getMousePosition().get(1));
 
-                texture.bind(0);
-                GraphicsAPI.drawIndexed(shader, vbo, ibo, 6);
+                    transform.mul(new Matrix4f().identity().rotateZ((float) (2 * Math.PI * (1 / 60.0))));
 
-                // glfwSwapBuffers(window); // swap the color buffers
-                m_window.swapBuffers();
+                    ubo.setData(transform.get(loopStack.mallocFloat(16)), 4 * 16);
+                    ubo.setToBindingPoint(0);
 
-                // Poll for window events. The key callback above will only be
-                // invoked during this call.
-                // glfwPollEvents();
-                Window.windowSystemPollEvents();
+                    texture.bind(0);
+                    shader.setUniformBuffer("Matrices", 0);
+                    GraphicsAPI.drawIndexed(shader, vbo, ibo, 6);
+
+                    // glfwSwapBuffers(window); // swap the color buffers
+                    m_window.swapBuffers();
+
+                    // Poll for window events. The key callback above will only be
+                    // invoked during this call.
+                    // glfwPollEvents();
+                    Window.windowSystemPollEvents();
+                }
             }
 
+            ibo.dispose();
             vbo.dispose();
+            shader.dispose();
         }
     }
 

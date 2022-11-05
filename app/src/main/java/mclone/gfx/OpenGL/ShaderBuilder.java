@@ -14,12 +14,19 @@ public class ShaderBuilder {
         uniformDescriptions.add(new Shader.ShaderBindingDescription.UniformDescription(name, type));
     }
 
+    public void addUniformBuffer(String name) {
+        uniformBufferDescriptions.add(new ShaderBindingDescription.UniformBufferDescription(name));
+    }
+
     public Shader get() {
-        ShaderBindingDescription description = new ShaderBindingDescription(uniformDescriptions);
+        ShaderBindingDescription description = new ShaderBindingDescription(uniformDescriptions, uniformBufferDescriptions);
         return new Shader(shaderSource, description);
     }
 
     private ArrayList<Shader.ShaderBindingDescription.UniformDescription> uniformDescriptions = 
+        new ArrayList<>();
+
+    private ArrayList<Shader.ShaderBindingDescription.UniformBufferDescription> uniformBufferDescriptions =
         new ArrayList<>();
     private Shader.ShaderSource shaderSource;
 }

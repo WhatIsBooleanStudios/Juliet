@@ -11,6 +11,7 @@ import org.lwjgl.system.MemoryStack;
 
 import mclone.Logging.Logger;
 import mclone.gfx.OpenGL.Shader.ShaderBindingDescription.UniformDescription;
+import mclone.gfx.OpenGL.Shader.ShaderBindingDescription.UniformBufferDescription;
 import mclone.gfx.OpenGL.ShaderPrimitiveUtil.ShaderPrimitiveType;
 
 import java.util.ArrayList;
@@ -37,7 +38,7 @@ public class Shader {
     }
 
     public static class ShaderBindingDescription {
-        public static class UniformDescription implements Serializable {
+        public static class UniformDescription {
             public UniformDescription(String name, ShaderPrimitiveType type) {
                 this.name = name;
                 this.type = type;
@@ -51,6 +52,7 @@ public class Shader {
 
             @Override
             public boolean equals(Object d) {
+                if(d.getClass() != this.getClass()) return false;
                 UniformDescription description = (UniformDescription)d;
                 return name == description.name && type == description.type;
             }
@@ -61,15 +63,35 @@ public class Shader {
             }
         }
 
-        public ShaderBindingDescription(ArrayList<UniformDescription> uniforms) {
+        public static class UniformBufferDescription {
+            public UniformBufferDescription(String name) {
+                this.name = name;
+            }
+
+            @Override
+            public int hashCode() {
+                return name.hashCode();
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                return name.equals(((UniformBufferDescription)obj).name);
+            }
+
+            String name;
+        }
+
+        public ShaderBindingDescription(ArrayList<UniformDescription> uniforms, ArrayList<UniformBufferDescription> uniformBuffers) {
             this.uniforms = uniforms;
+            this.uniformBuffers = uniformBuffers;
         }
 
         ArrayList<UniformDescription> getUniforms() { return uniforms; }
+        ArrayList<UniformBufferDescription> getUniformBuffers() { return uniformBuffers; }
 
         ArrayList<UniformDescription> uniforms;
 
-
+        ArrayList<UniformBufferDescription> uniformBuffers;
     }
 
 
@@ -92,6 +114,15 @@ public class Shader {
             }
             uniformLocationMap.put(description, location);
         }
+
+        for(UniformBufferDescription description : bindingDescription.uniformBuffers) {
+            int blockIndex = glGetUniformBlockIndex(m_ID, description.name);
+            if(blockIndex < 0) {
+                System.out.println("failed to find uniform buffer block index for ubo \"" + description.name + "\"");
+                continue;
+            }
+            uniformBufferBlockIndexMap.put(description, blockIndex);
+        }
     }
 
     public void bind() {
@@ -104,6 +135,16 @@ public class Shader {
 
     public void dispose() {
         glDeleteProgram(m_ID);
+    }
+
+    public void setUniformBuffer(String name, int bindingPoint) {
+        bind();
+        int blockIndex = uniformBufferBlockIndexMap.getOrDefault(new UniformBufferDescription(name), -1);
+        if(blockIndex < 0) {
+            System.out.println("failed to find block index for uniform buffer \"" + name + "\"");
+            return;
+        }
+        glUniformBlockBinding(m_ID, blockIndex, bindingPoint);
     }
 
     public void setUniformFloat(String name, float value) {
@@ -269,6 +310,7 @@ public class Shader {
 
     int m_ID;
 
-    HashMap<UniformDescription, Integer> uniformLocationMap = new HashMap<UniformDescription, Integer>();
+    HashMap<UniformDescription, Integer> uniformLocationMap = new HashMap<>();
+    HashMap<UniformBufferDescription, Integer> uniformBufferBlockIndexMap = new HashMap<>();
 }
 
