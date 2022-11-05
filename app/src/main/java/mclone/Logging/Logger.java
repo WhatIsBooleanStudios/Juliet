@@ -5,24 +5,21 @@ import java.io.FileReader;
 import java.io.FileWriter;
 
 public class Logger {
-
-    private static Logger m_logger = null;
-
-    public static Logger get() {
-        if (m_logger == null) {
-            m_logger = new Logger(true, "log.txt");
-        }
-
-        return m_logger;
-    }
-
-    public Logger(boolean logToFile, String pathToFile) {
-        this.m_LogToFile = logToFile;
-        if (this.m_LogToFile)
-            this.m_PathToFile = pathToFile;
+    public Logger(boolean logFile, String filePath) {
+        logToFile = logFile;
+        if (logToFile)
+            pathToFile = filePath;
 
         logToFile(this, null, null);
 
+    }
+
+    public static Logger get() {
+        if (staticLogger == null) {
+            staticLogger = new Logger(true, pathToFile);
+        }
+
+        return staticLogger;
     }
 
     public enum LogType {
@@ -40,7 +37,7 @@ public class Logger {
 
     private void logToFile(Object obj, LogType logType, String msg) {
         try {
-            File file = new File(this.m_PathToFile);
+            File file = new File(pathToFile);
             if (!file.isFile())
                 if (!file.createNewFile())
                     throw new Exception("file path error");
@@ -58,20 +55,12 @@ public class Logger {
             FileWriter writer = new FileWriter(file);
             String fileMsg = "\n\nLogging started at " + getTimestamp() + "\n-------------------------------";
             if (logType != null && msg != null)
-                switch (logType) {
-                    case ERROR:
-                        fileMsg = "\nERROR " + getTimestamp() + " " + className + " " + msg;
-                        break;
-                    case INFO:
-                        fileMsg = "\nINFO  " + getTimestamp() + " " + className + " " + msg;
-                        break;
-                    case TRACE:
-                        fileMsg = "\nTRACE " + getTimestamp() + " " + className + " " + msg;
-                        break;
-                    case WARN:
-                        fileMsg = "\nWARN  " + getTimestamp() + " " + className + " " + msg;
-                        break;
-                }
+                fileMsg = switch (logType) {
+                    case ERROR -> "\nERROR " + getTimestamp() + " " + className + " " + msg;
+                    case INFO -> "\nINFO  " + getTimestamp() + " " + className + " " + msg;
+                    case TRACE -> "\nTRACE " + getTimestamp() + " " + className + " " + msg;
+                    case WARN -> "\nWARN  " + getTimestamp() + " " + className + " " + msg;
+                };
             writer.write(current + fileMsg);
 
             writer.flush();
@@ -86,27 +75,15 @@ public class Logger {
             return false;
 
         switch (logType) {
-            case ERROR:
-                System.out.print("\033[31;49;1mERROR\033[37;49;1m " + getTimestamp());
-                break;
-            case INFO:
-                System.out.print("\033[32;49;1mINFO\033[37;49;1m  " + getTimestamp());
-                break;
-            case TRACE:
-                System.out.print("\033[34;49;1mTRACE\033[37;49;1m " + getTimestamp());
-                break;
-            case WARN:
-                System.out.print("\033[33;49;1mWARN\033[37;49;1m  " + getTimestamp());
-                break;
-            default:
-                System.out.print("\033[31;49;1mERROR\033[37;49;1m " + getTimestamp());
-                break;
-
+            case ERROR -> System.out.print("\033[31;49;1mERROR\033[37;49;1m " + getTimestamp());
+            case INFO -> System.out.print("\033[32;49;1mINFO\033[37;49;1m  " + getTimestamp());
+            case TRACE -> System.out.print("\033[34;49;1mTRACE\033[37;49;1m " + getTimestamp());
+            case WARN -> System.out.print("\033[33;49;1mWARN\033[37;49;1m  " + getTimestamp());
         }
         System.out.print("\033[37;49m " + msg + "\033[0m\n");
 
         if (!msg.equals("file path error")) {
-            if (this.m_LogToFile)
+            if (logToFile)
                 this.logToFile(obj, logType, msg);
             return true;
         } else
@@ -195,6 +172,7 @@ public class Logger {
         return 3;
     }
 
-    private String m_PathToFile;
-    private boolean m_LogToFile;
+    private static Logger staticLogger = null;
+    private static String pathToFile = "log.txt";
+    private static boolean logToFile = false;
 }

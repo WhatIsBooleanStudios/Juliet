@@ -1,7 +1,7 @@
 package mclone;
 
 import mclone.gfx.OpenGL.*;
-import mclone.platform.Window;
+import mclone.Platform.Window;
 
 import org.joml.Matrix4f;
 import org.lwjgl.*;
