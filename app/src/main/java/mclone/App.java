@@ -124,8 +124,8 @@ public class App {
 
             Matrix4f transform = new Matrix4f()
                 .identity()
-                .ortho2D(-1.0f * ((float)m_window.getWidth() / m_window.getHeight()), 
-                        1.0f * ((float)m_window.getWidth() / m_window.getHeight()),
+                .ortho2D(-((float)m_window.getWidth() / m_window.getHeight()),
+                        ((float)m_window.getWidth() / m_window.getHeight()),
                         -1.0f, 1.0f);
 
             UniformBuffer ubo = new UniformBuffer(null, 64, HardwareBuffer.UsageHints.USAGE_DYNAMIC);
@@ -137,14 +137,9 @@ public class App {
             // the window or has pressed the ESCAPE key.
             while (!m_window.shouldClose() && !m_window.keyPressed(GLFW_KEY_ESCAPE)) {
                 try(MemoryStack loopStack = MemoryStack.stackPush()) {
-                    if (m_window.mouseButtonPressed(GLFW_MOUSE_BUTTON_LEFT)) {
-                        glClearColor(0.0f, 1.0f, 0.0f, 1.0f);
-                    } else if (m_window.mouseButtonReleased(GLFW_MOUSE_BUTTON_LEFT)) {
-                        glClearColor(1.0f, 1.0f, 0.0f, 1.0f);
-                    } else {
-                        glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
-                    }
-                    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
+                    GraphicsAPI.setClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+                    GraphicsAPI.clear();
+
                     m_window.setTitle("Window! Cursor pos: " + m_window.getMousePosition().get(0) + " "
                         + m_window.getMousePosition().get(1));
 
@@ -157,18 +152,15 @@ public class App {
                     shader.setUniformBuffer("Matrices", 0);
                     GraphicsAPI.drawIndexed(shader, vbo, ibo, 6);
 
-                    // glfwSwapBuffers(window); // swap the color buffers
                     m_window.swapBuffers();
 
-                    // Poll for window events. The key callback above will only be
-                    // invoked during this call.
-                    // glfwPollEvents();
                     Window.windowSystemPollEvents();
                 }
             }
 
             ibo.dispose();
             vbo.dispose();
+            ubo.dispose();
             shader.dispose();
         }
     }

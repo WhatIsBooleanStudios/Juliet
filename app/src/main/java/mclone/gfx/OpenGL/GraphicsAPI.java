@@ -3,6 +3,12 @@ package mclone.gfx.OpenGL;
 import static org.lwjgl.opengl.GL33C.*;
 
 public class GraphicsAPI {
+    public static void setClearColor(float r, float g, float b, float a) {
+        glClearColor(r, g, b, a);
+    }
+    public static void clear() {
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    }
     public static void draw(Shader shader, VertexBuffer vbo, int vertexCount) {
         shader.bind();
         vbo.bind();

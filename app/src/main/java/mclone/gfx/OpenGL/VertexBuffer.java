@@ -62,7 +62,6 @@ public class VertexBuffer extends HardwareBuffer {
                 type == ShaderPrimitiveUtil.ShaderPrimitiveType.INT16) {
                 glVertexAttribIPointer(i, attrib.getCount(), ShaderPrimitiveUtil.mapShaderTypeToGLType(type), m_layout.getStride(), offset);
             } else if(type == ShaderPrimitiveUtil.ShaderPrimitiveType.FLOAT32) {
-                System.out.println("stride: " + m_layout.getStride());
                 glVertexAttribPointer(i, attrib.getCount(), ShaderPrimitiveUtil.mapShaderTypeToGLType(type), false, m_layout.getStride(), offset);
             } else if(type == ShaderPrimitiveUtil.ShaderPrimitiveType.FLOAT64) {
                 System.out.println("OpenGL 3.3 does not support 64 bit floats in vertex arrays!");

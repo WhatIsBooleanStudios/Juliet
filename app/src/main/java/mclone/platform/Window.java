@@ -13,20 +13,24 @@ import static org.lwjgl.system.MemoryUtil.*;
 import java.nio.DoubleBuffer;
 
 public class Window {
+    private static GLFWErrorCallback windowSystemErrorCallback;
     public static void initializeWindowSystem() {
         if (!glfwInit())
             Logger.get().error("Failed to initialize window system!");
 
-        GLFWErrorCallback cb = new GLFWErrorCallback() {
+        windowSystemErrorCallback = new GLFWErrorCallback() {
             @Override
             public void invoke(int error, long description) {
                 Logger.get().error(this, "GLFW ERROR " + error + ": " + memUTF8(description));
             }
         };
-        glfwSetErrorCallback(cb);
+        glfwSetErrorCallback(windowSystemErrorCallback);
     }
 
     public static void shutdownWindowSystem() {
+        GLFWErrorCallback cb = glfwSetErrorCallback(null);
+        if(cb != null) cb.free();
+
         glfwTerminate();
     }
 

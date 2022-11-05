@@ -40,7 +40,6 @@ public class VertexBufferLayout {
                 System.out.println("Vertex attribute at offset " + stride + " has an invalid value");
                 break;
             }
-            System.out.println("Size: " + size);
             stride += size;
         }
 
