@@ -31,7 +31,7 @@ public class App {
 
     private void init() {
         Window.initializeWindowSystem();
-        m_window = new Window("Window!", 720, 480, false);
+        m_window = new Window("Window!", 1024, 768, false);
         m_window.makeContextCurrent();
     }
 
