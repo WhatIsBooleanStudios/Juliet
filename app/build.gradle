@@ -34,7 +34,7 @@ repositories {
 
 dependencies {
 	implementation platform("org.lwjgl:lwjgl-bom:$lwjglVersion")
-
+    implementation 'net.onedaybeard.artemis:artemis-odb:2.3.0'
 	implementation "org.lwjgl:lwjgl"
 	implementation "org.lwjgl:lwjgl-assimp"
 	implementation "org.lwjgl:lwjgl-glfw"
