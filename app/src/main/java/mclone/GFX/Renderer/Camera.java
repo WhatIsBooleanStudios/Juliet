@@ -13,6 +13,7 @@ public class Camera {
         this.projection = new Matrix4f().perspective(fovY, aspectRatio, 0.1f, 100.0f);
         this.projectionXView = calculate();
     }
+
     /**
      * Calculates the ProjectionXView Mat4x4
      * @return Returns a Mat4x4 of the ProjectionXView
@@ -24,35 +25,42 @@ public class Camera {
         Matrix4f tProjection = new Matrix4f(this.projection);
         return tProjection.mul(new Matrix4f().lookAt(direction, cameraPosition, new Vector3f(0.0f,1.0f,0.0f)));
     }
+
     /**
      * @return Returns the ProjectionXView of the current scene
      */
     public Matrix4f getProjectionXView() { return this.projectionXView; }
+
     /**
      * Sets the pitch of the direction view
      * @param pitch The pitch to overwrite
      */
     public void setPitch(float pitch) { this.pitch = pitch; this.projectionXView = calculate(); }
+
     /**
      * Offsets the current pitch value
      * @param pitch The pitch to offset by
      */
     public void offsetPitch(float pitch) { this.pitch += pitch; this.projectionXView = calculate(); }
+
     /**
      * Sets the yaw of the direction view
      * @param yaw The yaw to overwrite
      */
     public void setYaw(float yaw) { this.yaw = yaw; this.projectionXView = calculate(); }
+
     /**
      * Offsets the current yaw value
      * @param yaw The yaw to offset by
      */
     public void offsetYaw(float yaw) { this.yaw += yaw; this.projectionXView = calculate(); }
+
     /**
      * Sets the position of the camera
      * @param cameraPosition The new position of the camera
      */
     public void setCameraPosition(Vector3f cameraPosition) { this.cameraPosition = cameraPosition; this.projectionXView = calculate(); }
+
     /**
      * Offsets the current camera position
      * @param cameraPosition The position to offset the current camera by
