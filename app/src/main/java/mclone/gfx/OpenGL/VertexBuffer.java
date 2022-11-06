@@ -7,7 +7,18 @@ import java.nio.Buffer;
 
 import static org.lwjgl.opengl.GL33C.*;
 
+/**
+ * Wrapper over the OpenGL Vertex Buffer which is a Hardware Buffer that can reside in CPU and GPU memory.
+ * This is used to describe the vertices of meshes during drawing.
+ */
 public class VertexBuffer extends HardwareBuffer {
+    /**
+     * Create and allocate a VertexBuffer
+     * @param data The data to be copied into the vertex buffer. Can be null, but requires size > 0. Can be freed after this function call
+     * @param size The size in bytes of data. If data is null, size is used to allocate an empty buffer
+     * @param hint An allocation hint for the OpenGL driver
+     * @param layout The layout of the data that will be entered into the buffer
+     */
     public VertexBuffer(Buffer data, long size, UsageHints hint, VertexBufferLayout layout) {
         this.layout = layout;
         maxSize = size;
@@ -16,6 +27,54 @@ public class VertexBuffer extends HardwareBuffer {
         setInitializeVBOData(data, size, hint);
         createVAO();
         setVertexBufferToVertexArray();
+    }
+
+    /**
+     * Update the data in a vertex buffer
+     * @param data The new data. Must not be null. Can be freed after this function call
+     * @param size The size of the data. Must be greater than 0 and less than the maximumSize which is the size specified
+     *             during the creation of the buffer.
+     */
+    public void setData(Buffer data, long size) {
+        glBindVertexArray(vaoID);
+        nglBufferSubData(GL_VERTEX_ARRAY, 0, size, memAddress(data));
+    }
+
+    /**
+     * Bind the vertex buffer
+     */
+    @Override
+    public void bind() {
+        glBindVertexArray(vaoID);
+    }
+
+    /**
+     * UnBind the vertex buffer. After this, no vertex buffer will be bound.
+     */
+    @Override
+    public void unBind() {
+        glBindVertexArray(0);
+    }
+
+    /**
+     * Retrieve the maximum size of the buffer
+     * @return The maximum size in bytes of the VertexBuffer. Specified during creation of the buffer.
+     */
+    @Override
+    public long getMaxSize() {
+        return maxSize;
+    }
+
+    /**
+     * Free the memory and objects associated with the VertexBuffer. This should be called when you are finished with
+     * it.
+     */
+    @Override
+    public void dispose() {
+        glDeleteBuffers(vboID);
+        glDeleteVertexArrays(vaoID);
+        vboID = 0;
+        vaoID = 0;
     }
 
     private void createVAO() {
@@ -40,11 +99,6 @@ public class VertexBuffer extends HardwareBuffer {
         } else {
             Logger.error("VertexBuffer.setInitializeVBOData", this, "If data is null, size must be > 0");
         }
-    }
-
-    public void setData(Buffer data, long size) {
-        glBindVertexArray(vaoID);
-        nglBufferSubData(GL_VERTEX_ARRAY, 0, size, memAddress(data));
     }
 
     private void setVertexBufferToVertexArray() {
@@ -77,28 +131,7 @@ public class VertexBuffer extends HardwareBuffer {
         vboID = glGenBuffers();
     }
 
-    @Override
-    public void bind() {
-        glBindVertexArray(vaoID);
-    }
 
-    @Override
-    public void unBind() {
-        glBindVertexArray(0);
-    }
-
-    @Override
-    public long getMaxSize() {
-        return maxSize;
-    }
-
-    @Override
-    public void dispose() {
-        glDeleteBuffers(vboID);
-        glDeleteVertexArrays(vaoID);
-        vboID = 0;
-        vaoID = 0;
-    }
 
     @Override
     protected void finalize() throws Throwable {

@@ -7,7 +7,19 @@ import java.nio.Buffer;
 import static org.lwjgl.system.MemoryUtil.*;
 import static org.lwjgl.opengl.GL33C.*;
 
+/**
+ * Stores GPU uniform data in a OpenGL buffer for more efficient access by shaders.
+ * Essentially, these buffers are bound to binding points and multiple shaders can then connect their
+ * uniform blocks to these binding points to access the data within them.
+ * @see Shader#setUniformBuffer(String, int)
+ */
 public class UniformBuffer extends HardwareBuffer {
+    /**
+     * Create a Uniform Buffer
+     * @param data The data to be copied into the buffer can be null if size > 0
+     * @param size The size in bytes of data. If data is null, the constructor creates an empty buffer with this size
+     * @param usage GPU allocation hints for OpenGL
+     */
     public UniformBuffer(Buffer data, long size, HardwareBuffer.UsageHints usage) {
         id = glGenBuffers();
         glBindBuffer(GL_UNIFORM_BUFFER, id);
