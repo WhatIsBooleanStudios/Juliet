@@ -1,7 +1,6 @@
 package mclone.GFX.Renderer;
 
 import org.joml.Vector3f;
-
 import org.joml.Matrix4f;
 
 public class Camera {
@@ -20,8 +19,8 @@ public class Camera {
     public Matrix4f getProjectionXView() { return this.projectionXView; }
     public void setPitch(float pitch) { this.pitch = pitch; this.projectionXView = calculate(); }
     public void offsetPitch(float pitch) { this.pitch += pitch; this.projectionXView = calculate(); }
-    public void setYaw(float yaw) { this.pitch = yaw; this.projectionXView = calculate(); }
-    public void offsetYaw(float yaw) { this.pitch += yaw; this.projectionXView = calculate(); }
+    public void setYaw(float yaw) { this.yaw = yaw; this.projectionXView = calculate(); }
+    public void offsetYaw(float yaw) { this.yaw += yaw; this.projectionXView = calculate(); }
     public void setCameraPosition(Vector3f cameraPosition) { this.cameraPosition = cameraPosition; this.projectionXView = calculate(); }
     public void offsetCameraPosition(Vector3f cameraPosition) { this.cameraPosition.add(cameraPosition); this.projectionXView = calculate(); }
 
