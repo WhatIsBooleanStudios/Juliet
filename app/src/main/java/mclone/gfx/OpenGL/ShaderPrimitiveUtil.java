@@ -2,7 +2,14 @@ package mclone.gfx.OpenGL;
 
 import static org.lwjgl.opengl.GL33.*;
 
+/**
+ * Utilities to deal with shader types
+ */
 public class ShaderPrimitiveUtil {
+
+    /**
+     * Enum describing OpenGL Shader primitives
+     */
     public enum ShaderPrimitiveType {
         FLOAT32,
         FLOAT64,
@@ -19,6 +26,11 @@ public class ShaderPrimitiveUtil {
         MAT4
     }
 
+    /**
+     * Get the size of Shader Primitives
+     * @param type Type to find the size of
+     * @return Size in bytes of type
+     */
     public static int getSizeOfType(ShaderPrimitiveType type) {
         switch (type) {
             case FLOAT32:
@@ -47,6 +59,11 @@ public class ShaderPrimitiveUtil {
         return -1;
     }
 
+    /**
+     * Maps the mclone Shader type to the underlying OpenGL type
+     * @param type The type to map
+     * @return The OpenGL underlying type
+     */
     public static int mapShaderTypeToGLType(ShaderPrimitiveType type) {
         switch(type) {
             case FLOAT32:

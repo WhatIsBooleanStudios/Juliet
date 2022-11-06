@@ -13,8 +13,17 @@ import static org.lwjgl.opengl.GL33C.*;
 
 import static org.lwjgl.system.MemoryUtil.*;
 
+/**
+ * An abstraction over OpenGL Textures which are essentially GPU-images
+ */
 public class Texture {
+
+    /**
+     * Creates a texture from a file in the filesystem
+     * @param path The path to the file
+     */
     public Texture(String path) {
+        this.name = path;
         int[] width = {0};
         int[] height = {0};
         int[] nrChannels = {0};
@@ -31,9 +40,49 @@ public class Texture {
         stbi_image_free(data);
     }
 
-    public Texture(ByteBuffer data, int[] width, int[] height) {
+    /**
+     * Creates a Texture from preloaded data.
+     * @param name The name of the texture (user defined)
+     * @param data The texture data to be stored in the object
+     * @param width The width of the image (in pixels)
+     * @param height The height of the image (in pixels)
+     */
+    public Texture(String name, ByteBuffer data, int[] width, int[] height) {
+        this.name = name;
         createFromData(data, width, height);
     }
+
+    /**
+     * Bind the texture
+     */
+    private void bind() {
+        glBindTexture(GL_TEXTURE_2D, id);
+    }
+
+    /**
+     * Bind the texture to the texture slot givenj
+     * @param slot The texture slot 0 <= slot < hardwareMaximum
+     */
+    public void bind(int slot) {
+        glActiveTexture(GL_TEXTURE0 + slot);
+        bind();
+    }
+
+    /**
+     * UnBinds the Texture
+     */
+    public void unBind() {
+        glBindTexture(GL_TEXTURE_2D, 0);
+    }
+
+    /**
+     * Frees the memory and objects associated with the texture
+     */
+    public void dispose() {
+        glDeleteTextures(id);
+        id = -1;
+    }
+
 
     private void createFromData(ByteBuffer data, int[] width, int[] height) {
         id = glGenTextures();
@@ -49,23 +98,10 @@ public class Texture {
         glGenerateMipmap(GL_TEXTURE_2D);
     }
 
-    private void bind() {
-        glBindTexture(GL_TEXTURE_2D, id);
-    }
-
-    public void bind(int slot) {
-        glActiveTexture(GL_TEXTURE0 + slot);
-        bind();
-    }
-
-    public void dispose() {
-        glDeleteTextures(id);
-        id = -1;
-    }
 
     @Override
     public String toString() {
-        return "Texture(id=" + id + ")";
+        return "Texture(id=" + id + " name=\"" + name + "\")";
     }
 
     @Override
@@ -76,10 +112,9 @@ public class Texture {
         }
     }
 
-    public void unBind() {
-        glBindTexture(GL_TEXTURE_2D, 0);
-    }
 
     private int id = -1;
+
+    private String name;
 }
 

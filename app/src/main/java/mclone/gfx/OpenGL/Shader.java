@@ -20,9 +20,23 @@ import java.nio.IntBuffer;
 
 import static org.lwjgl.opengl.GL33C.*;
 
+/**
+ * A program the runs on the GPU. This is used for translating worlds-space coordinates to screen-space and setting the
+ * color of pixels on the screen
+ */
 public class Shader {
 
+    /**
+     * Describes the source code of the shader
+     */
     public static class ShaderSource {
+        /**
+         * Create a ShaderSource object
+         * @param vertexShaderName The name of the vertex shader
+         * @param vs The vertex shader source code
+         * @param fragmentShaderName The name of the fragment shader
+         * @param fs The fragment shader source code
+         */
         public ShaderSource(String vertexShaderName, String vs, String fragmentShaderName, String fs) {
             this.vs = vs;
             this.fs = fs;
@@ -30,9 +44,24 @@ public class Shader {
             this.fsName = fragmentShaderName;
         }
 
+        /**
+         * @return The vertex shader source code
+         */
         public String getVS() { return vs; }
+
+        /**
+         * @return The name of the vertex shader
+         */
         public String getVsName() { return vsName; }
+
+        /**
+         * @return The fragment shader source code
+         */
         public String getFS() { return fs; }
+
+        /**
+         * @return The name of the fragment shader.
+         */
         public String getFsName() { return fsName; }
 
         private String vs;

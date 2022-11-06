@@ -35,6 +35,11 @@ public class UniformBuffer extends HardwareBuffer {
         maxSize = size;
     }
 
+    /**
+     * Copy data into the UniformBuffer
+     * @param data The Data to be copied into the UniformBuffer
+     * @param size The size of the data where 0 < size < UniformBuffer#getMaxSize()
+     */
     public void setData(Buffer data, long size) {
         bind();
         if(size > maxSize) {
@@ -44,27 +49,45 @@ public class UniformBuffer extends HardwareBuffer {
         nglBufferSubData(GL_UNIFORM_BUFFER, 0, size, memAddress(data));
     }
 
-	@Override
+    /**
+     * Bind the uniform buffer
+     */
+    @Override
 	public void bind() {
         glBindBuffer(GL_UNIFORM_BUFFER, id);
 	}
 
-	@Override
+    /**
+     * UnBind the uniform buffer
+     */
+    @Override
 	public void unBind() {
         glBindBuffer(GL_UNIFORM_BUFFER, 0);
 	}
 
+    /**
+     * Bind the uniform buffer to the given binding point
+     * @param bindingPoint The binding point to set the uniform buffer too. Must be negative or exceed the maximum defined
+     *                     by the hardware/drivers
+     */
     public void setToBindingPoint(int bindingPoint) {
         bind();
         glBindBufferBase(GL_UNIFORM_BUFFER, bindingPoint, id);
     }
 
+    /**
+     * Get the max size in bytes of the UniformBuffer (set in the constructor)
+     * @return The maximum size of the UniformBuffer in bytes
+     */
 	@Override
 	public long getMaxSize() {
         return maxSize;
 	}
 
-	@Override
+    /**
+     * Free the memory and objects associated with this UniformBuffer
+     */
+    @Override
 	public void dispose() {
         glDeleteBuffers(id);
         id = 0;
