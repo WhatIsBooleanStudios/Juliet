@@ -1,32 +1,43 @@
 package mclone.Logging;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.*;
 
 public class Logger {
-    public Logger(boolean logFile, String filePath) {
-        logToFile = logFile;
-        if (logToFile)
-            pathToFile = filePath;
+    public static void initialize(boolean logToFile, String pathToFile) {
+        Logger.logToFile = logToFile;
+        Logger.pathToFile = pathToFile;
 
-        logToFile(this, null, null);
+        if(logToFile) {
+            try {
+                File logFile = new File(pathToFile);
+                if (!logFile.isFile() && !logFile.createNewFile())
+                    error("File path error!");
 
-    }
+                fileOutputStream = new PrintStream(new BufferedOutputStream(new FileOutputStream(logFile, true)));
+                logHeaderToFile();
 
-    public static Logger get() {
-        if (staticLogger == null) {
-            staticLogger = new Logger(true, pathToFile);
+            } catch (Exception e) {
+                error(e.getMessage());
+            }
         }
-
-        return staticLogger;
     }
 
+    public static void shutdown() {
+        if(fileOutputStream != null)
+            fileOutputStream.close();
+    }
+
+    private Logger() {}
     public enum LogType {
         ERROR,
         WARN,
         TRACE,
         INFO
+    }
+
+    public static void flush() {
+        System.out.flush();
+        fileOutputStream.flush();
     }
 
     private static String getTimestamp() {
@@ -35,144 +46,185 @@ public class Logger {
                 + java.time.LocalTime.now().getSecond() + "]";
     }
 
-    private void logToFile(Object obj, LogType logType, String msg) {
+    private static void logHeaderToFile() {
+        String fileMsg = "\n\nLogging started at " + getTimestamp() + "\n-------------------------------";
+        fileOutputStream.println(fileMsg);
+    }
+
+    private static void logToFile(String caller, Object obj, LogType logType, String msg) {
         try {
-            File file = new File(pathToFile);
-            if (!file.isFile())
-                if (!file.createNewFile())
-                    throw new Exception("file path error");
+            String messageSource =
+                (obj == null ? "" : obj.toString()) +
+                (caller.equals("") || obj == null ? "" : "@") +
+                caller;
+            String toPrint = switch (logType) {
+                case ERROR -> "ERROR " + getTimestamp() + " " + messageSource + " " + msg;
+                case INFO -> "INFO  " + getTimestamp() + " " + messageSource + " " + msg;
+                case TRACE -> "TRACE " + getTimestamp() + " " + messageSource + " " + msg;
+                case WARN -> "WARN  " + getTimestamp() + " " + messageSource + " " + msg;
+            };
 
-            FileReader reader = new FileReader(file);
-            String current = "";
-            int character;
-
-            while ((character = reader.read()) != -1) {
-                current += (char) character;
-            }
-
-            reader.close();
-            String className = obj == null ? "" : obj.getClass().getName();
-            FileWriter writer = new FileWriter(file);
-            String fileMsg = "\n\nLogging started at " + getTimestamp() + "\n-------------------------------";
-            if (logType != null && msg != null)
-                fileMsg = switch (logType) {
-                    case ERROR -> "\nERROR " + getTimestamp() + " " + className + " " + msg;
-                    case INFO -> "\nINFO  " + getTimestamp() + " " + className + " " + msg;
-                    case TRACE -> "\nTRACE " + getTimestamp() + " " + className + " " + msg;
-                    case WARN -> "\nWARN  " + getTimestamp() + " " + className + " " + msg;
-                };
-            writer.write(current + fileMsg);
-
-            writer.flush();
-            writer.close();
+            fileOutputStream.println(toPrint);
         } catch (Exception e) {
-            handleMessage(obj, LogType.ERROR, e.getMessage());
+            handleMessage("Logger.logToFile", obj, LogType.ERROR, e.getMessage());
         }
     }
 
-    private boolean handleMessage(Object obj, LogType logType, String msg) {
+    private static boolean handleMessage(String caller, Object obj, LogType logType, String msg) {
         if (msg == null)
             return false;
-
         switch (logType) {
             case ERROR -> System.out.print("\033[31;49;1mERROR\033[37;49;1m " + getTimestamp());
             case INFO -> System.out.print("\033[32;49;1mINFO\033[37;49;1m  " + getTimestamp());
             case TRACE -> System.out.print("\033[34;49;1mTRACE\033[37;49;1m " + getTimestamp());
             case WARN -> System.out.print("\033[33;49;1mWARN\033[37;49;1m  " + getTimestamp());
         }
+
+        if(obj != null) {
+            System.out.print(obj);
+        }
+
+        if(caller != null && !caller.isEmpty()) {
+            if(obj != null) {
+                System.out.print("@");
+            }
+            System.out.print(caller);
+        }
         System.out.print("\033[37;49m " + msg + "\033[0m\n");
 
-        if (!msg.equals("file path error")) {
-            if (logToFile)
-                this.logToFile(obj, logType, msg);
-            return true;
-        } else
-            return false;
+        if (logToFile) {
+            logToFile(caller, obj, logType, msg);
+        }
 
+        return true;
     }
 
-    public int error(Object obj, String msg) {
-        if (obj == null) {
-            error(this.getClass(), "invalid class ptr");
-            return 1;
-        }
-
-        if (msg == null || msg.equals("")) {
-            error(obj, "invalid message");
-            return 2;
-        }
-
-        if (handleMessage(obj, LogType.ERROR, msg))
+    public static int error(String caller, Object obj, String msg) {
+        if (handleMessage(caller, obj, LogType.ERROR, msg))
             return 0;
 
         return 3;
     }
 
-    public int error(String msg) {
+    public static int error(Object obj, String msg) {
+        if (handleMessage("", obj, LogType.ERROR, msg)) {
+            return 0;
+        }
+
+        return 3;
+    }
+
+    public static int error(String caller, String msg) {
+        if (handleMessage(caller, null, LogType.ERROR, msg)) {
+            return 0;
+        }
+
+        return 3;
+    }
+
+    public static int error(String msg) {
 
         if (msg == null || msg.equals("")) {
             error("invalid message");
             return 2;
         }
 
-        if (handleMessage(null, LogType.ERROR, msg))
+        if (handleMessage("", null, LogType.ERROR, msg))
             return 0;
 
         return 3;
     }
 
-    public int warn(Object obj, String msg) {
-        if (obj == null) {
-            error(this.getClass(), "invalid class ptr");
-            return 1;
+    public static int warn(String caller, Object obj, String msg) {
+        if (handleMessage(caller, obj, LogType.WARN, msg)) {
+            return 0;
         }
 
-        if (msg == null || msg.equals("")) {
-            error(obj, "invalid message");
-            return 2;
+        return 3;
+    }
+
+    public static int warn(Object obj, String msg) {
+        if (handleMessage("", obj, LogType.WARN, msg)) {
+            return 0;
         }
 
-        if (handleMessage(obj, LogType.WARN, msg))
+        return 3;
+    }
+
+    public static int warn(String caller, String msg) {
+        if(handleMessage(caller, null, LogType.WARN, msg)) {
+            return 0;
+        }
+
+        return 3;
+    }
+
+    public static int warn(String msg) {
+        if (handleMessage("", null, LogType.WARN, msg)) {
+            return 0;
+        }
+
+        return 3;
+    }
+
+    public static int trace(String caller, Object obj, String msg) {
+        if (handleMessage(caller, obj, LogType.TRACE, msg))
+            return 0;
+
+        return 3;
+    }
+    public static int trace(Object obj, String msg) {
+        if (handleMessage("", obj, LogType.TRACE, msg))
             return 0;
 
         return 3;
     }
 
-    public int trace(Object obj, String msg) {
-        if (obj == null) {
-            error(this.getClass(), "invalid class ptr");
-            return 1;
+    public static int trace(String caller, String msg) {
+        if (handleMessage(caller, null, LogType.TRACE, msg)) {
+            return 0;
         }
 
-        if (msg == null || msg.equals("")) {
-            error(obj, "invalid message");
-            return 2;
-        }
+        return 3;
+    }
 
-        if (handleMessage(obj, LogType.TRACE, msg))
+    public static int trace(String msg) {
+        if (handleMessage("", null, LogType.TRACE, msg))
             return 0;
 
         return 3;
     }
 
-    public int info(Object obj, String msg) {
-        if (obj == null) {
-            error(this.getClass(), "invalid class ptr");
-            return 1;
-        }
+    public static int info(String caller, Object obj, String msg) {
+        if (handleMessage(caller, obj, LogType.INFO, msg))
+            return 0;
 
-        if (msg == null || msg.equals("")) {
-            error(obj, "invalid message");
-            return 2;
-        }
-
-        if (handleMessage(obj, LogType.INFO, msg))
+        return 3;
+    }
+    public static int info(Object obj, String msg) {
+        if (handleMessage("", obj, LogType.INFO, msg))
             return 0;
 
         return 3;
     }
 
-    private static Logger staticLogger = null;
+    public static int info(String caller, String msg) {
+        if(handleMessage(caller, null, LogType.INFO, msg)) {
+            return 0;
+        }
+
+        return 3;
+    }
+
+    public static int info(String msg) {
+        if(handleMessage("", null, LogType.INFO, msg)) {
+            return 0;
+        }
+
+        return 3;
+    }
+
     private static String pathToFile = "log.txt";
+    private static PrintStream fileOutputStream = null;
     private static boolean logToFile = false;
 }
