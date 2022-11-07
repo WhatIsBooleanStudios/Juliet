@@ -1,5 +1,6 @@
 package mclone;
 
+import mclone.GFX.Renderer.Camera;
 import mclone.gfx.OpenGL.*;
 import mclone.Platform.Window;
 
@@ -64,10 +65,10 @@ public class App {
             // Set the clear color
 
             float[] vertices = {
-                -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-                 0.5f, -0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-                 0.5f,  0.5f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-                 -0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f
+                -0.5f, -0.5f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+                 0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
+                 0.5f,  0.5f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f,
+                 -0.5f, 0.5f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f
             };
 
             int[] indices = {
@@ -121,11 +122,8 @@ public class App {
             shaderBuilder.addUniformBuffer("Matrices");
             Shader shader = shaderBuilder.createShader("BasicShader");
 
-            Matrix4f transform = new Matrix4f()
-                .identity()
-                .ortho2D(-((float) window.getWidth() / window.getHeight()),
-                        ((float) window.getWidth() / window.getHeight()),
-                        -1.0f, 1.0f);
+            Camera camera = new Camera(4.0f / 3.0f, 45.0f);
+            Matrix4f transform = camera.getProjectionXView();
 
             UniformBuffer ubo = new UniformBuffer(null, 64, HardwareBuffer.UsageHints.USAGE_DYNAMIC);
 
@@ -142,7 +140,7 @@ public class App {
                     window.setTitle("Window! Cursor pos: " + window.getMousePosition().get(0) + " "
                         + window.getMousePosition().get(1));
 
-                    transform.mul(new Matrix4f().identity().rotateZ((float) (2 * Math.PI * (1 / 60.0))));
+                    // transform.mul(new Matrix4f().identity().rotateZ((float) (2 * Math.PI * (1 / 60.0))));
 
                     ubo.setData(transform.get(loopStack.mallocFloat(16)), 4 * 16);
                     ubo.setToBindingPoint(0);
