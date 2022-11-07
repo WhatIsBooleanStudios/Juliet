@@ -17,27 +17,31 @@ public class Window {
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+        glfwWindowHint(GLFW_CONTEXT_DEBUG, GL_TRUE);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         windowHandle = glfwCreateWindow(width, height, title, fullscreen ? glfwGetPrimaryMonitor() : 0, 0);
         if (windowHandle == 0) {
-            System.out.println("Failed to create window \"" + title + "\"!");
+            Logger.error("Window.new", this, "Failed to create window \"" + title + "\"!");
         }
     }
 
     public static void initializeWindowSystem() {
+        Logger.info("Window.initializeWindowSystem", "initializing window system!");
         if (!glfwInit())
-            Logger.get().error("Failed to initialize window system!");
+            Logger.error("Window.initializeWindowSystem", "Failed to initialize window system!");
 
         GLFWErrorCallback cb = new GLFWErrorCallback() {
             @Override
             public void invoke(int error, long description) {
-                Logger.get().error(this, "GLFW ERROR " + error + ": " + memUTF8(description));
+                Logger.error("GLFWErrorCallback.invoke", this, "error #" + error + ": " + memUTF8(description));
             }
         };
         glfwSetErrorCallback(cb);
     }
 
     public static void shutdownWindowSystem() {
+        GLFWErrorCallback cb = glfwSetErrorCallback(null);
+        if(cb != null) cb.free();
         glfwTerminate();
     }
 
@@ -60,6 +64,21 @@ public class Window {
     public boolean shouldClose() {
         return glfwWindowShouldClose(windowHandle);
     }
+
+    public int getWidth() {
+        int[] width = {0};
+        int[] height = {0};
+        glfwGetWindowSize(windowHandle, width, height);
+        return width[0];
+    }
+
+    public int getHeight() {
+        int[] width = {0};
+        int[] height = {0};
+        glfwGetWindowSize(windowHandle, width, height);
+        return height[0];
+    }
+
 
     public boolean keyPressed(int key) {
         int status = glfwGetKey(windowHandle, key);
@@ -105,10 +124,15 @@ public class Window {
         return mousePosition;
     }
 
-    public void destruct() {
+    public void dispose() {
         glfwFreeCallbacks(windowHandle);
         glfwDestroyWindow(windowHandle);
     }
 
-    private long windowHandle = 0;
+    @Override
+    public String toString() {
+        return "Window(handle=" + windowHandle + ")";
+    }
+
+    private long windowHandle;
 }
