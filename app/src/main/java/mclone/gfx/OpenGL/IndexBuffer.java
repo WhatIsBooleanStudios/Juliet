@@ -1,4 +1,4 @@
-package mclone.gfx.OpenGL;
+package mclone.GFX.OpenGL;
 
 import mclone.Logging.Logger;
 

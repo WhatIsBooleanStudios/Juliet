@@ -1,4 +1,4 @@
-package mclone.gfx.OpenGL;
+package mclone.GFX.OpenGL;
 
 import org.joml.Matrix2f;
 import org.joml.Matrix3f;
@@ -9,9 +9,9 @@ import org.joml.Vector4f;
 import org.lwjgl.system.MemoryStack;
 
 import mclone.Logging.Logger;
-import mclone.gfx.OpenGL.Shader.ShaderBindingDescription.UniformDescription;
-import mclone.gfx.OpenGL.Shader.ShaderBindingDescription.UniformBufferDescription;
-import mclone.gfx.OpenGL.ShaderPrimitiveUtil.ShaderPrimitiveType;
+import mclone.GFX.OpenGL.Shader.ShaderBindingDescription.UniformDescription;
+import mclone.GFX.OpenGL.Shader.ShaderBindingDescription.UniformBufferDescription;
+import mclone.GFX.OpenGL.ShaderPrimitiveUtil.ShaderPrimitiveType;
 
 import java.util.ArrayList;
 import java.util.HashMap;

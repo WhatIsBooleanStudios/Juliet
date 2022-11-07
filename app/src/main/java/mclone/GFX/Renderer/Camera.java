@@ -20,12 +20,20 @@ public class Camera {
      * @return Returns a Mat4x4 of the ProjectionXView
      */
     private Matrix4f calculate() {
+        Vector3f direction = getDirection();
+        direction.add(cameraPosition);
+        Matrix4f tProjection = new Matrix4f(this.projection);
+        return tProjection.mul(new Matrix4f().identity().lookAt(direction, cameraPosition, new Vector3f(0.0f,1.0f,0.0f)));
+    }
+
+    /**
+     *
+     */
+    public Vector3f getDirection() {
         Vector3f direction = new Vector3f((float)Math.cos(this.yaw - (float)(Math.PI / 2.0f)) * (float)Math.cos(this.pitch),
                                              (float)Math.sin(this.pitch),
                                           (float)Math.sin(this.yaw - (float)(Math.PI / 2.0f)) * (float)Math.cos(this.pitch));
-        Logger.trace("Camera.calculate", "direction: " + direction);
-        Matrix4f tProjection = new Matrix4f(this.projection);
-        return tProjection.mul(new Matrix4f().identity().lookAt(direction, cameraPosition, new Vector3f(0.0f,1.0f,0.0f)));
+        return direction;
     }
 
     /**

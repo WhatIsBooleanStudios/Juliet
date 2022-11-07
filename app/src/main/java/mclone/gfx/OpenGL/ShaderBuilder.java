@@ -1,7 +1,7 @@
-package mclone.gfx.OpenGL;
+package mclone.GFX.OpenGL;
 
 import java.util.ArrayList;
-import static mclone.gfx.OpenGL.Shader.ShaderBindingDescription;
+import static mclone.GFX.OpenGL.Shader.ShaderBindingDescription;
 
 /**
  * Provides an easier way to construct a shader

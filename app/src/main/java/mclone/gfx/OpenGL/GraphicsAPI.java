@@ -1,4 +1,4 @@
-package mclone.gfx.OpenGL;
+package mclone.GFX.OpenGL;
 
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GLUtil;

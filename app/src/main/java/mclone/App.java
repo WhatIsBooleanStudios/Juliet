@@ -1,18 +1,19 @@
 package mclone;
 
 import mclone.GFX.Renderer.Camera;
-import mclone.gfx.OpenGL.*;
+import mclone.GFX.OpenGL.*;
 import mclone.Platform.Window;
 
 import org.joml.Matrix4f;
+import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.lwjgl.*;
 import org.lwjgl.system.Callback;
 import org.lwjgl.system.MemoryStack;
 
 import mclone.Logging.Logger;
-import mclone.gfx.OpenGL.ShaderPrimitiveUtil.ShaderPrimitiveType;
-import mclone.gfx.OpenGL.VertexBufferLayout.VertexAttribute;
+import mclone.GFX.OpenGL.ShaderPrimitiveUtil.ShaderPrimitiveType;
+import mclone.GFX.OpenGL.VertexBufferLayout.VertexAttribute;
 
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -130,6 +131,11 @@ public class App {
 
             Texture texture = new Texture("textures/waves.jpeg");
 
+            Vector2f screenCenter = new Vector2f(window.getWidth() / 2.0f, window.getHeight() / 2.0f);
+            window.setMousePosition(screenCenter);
+            Vector2f previousMousePosition = window.getMousePosition();
+            window.captureCursor(true);
+
             
             // Run the rendering loop until the user has attempted to close
             // the window or has pressed the ESCAPE key.
@@ -141,18 +147,33 @@ public class App {
                     window.setTitle("Window! Cursor pos: " + window.getMousePosition().get(0) + " "
                         + window.getMousePosition().get(1));
 
-                    if(window.keyPressed(GLFW_KEY_A)) {
-                        camera.offsetCameraPosition(new Vector3f(-0.05f, 0.0f, 0.0f));
+                    final float cameraSpeed = 0.05f; // adjust accordingly
+                    if (window.keyPressed(GLFW_KEY_W)) {
+                        //cameraPos += cameraSpeed * cameraFront;
+                        camera.offsetCameraPosition(camera.getDirection().mul(-cameraSpeed));
                     }
-                    if(window.keyPressed(GLFW_KEY_D)) {
-                        camera.offsetCameraPosition(new Vector3f(0.05f, 0.0f, 0.0f));
+                    if (window.keyPressed(GLFW_KEY_S)) {
+                        //cameraPos -= cameraSpeed * cameraFront;
+                        camera.offsetCameraPosition(camera.getDirection().mul(cameraSpeed));
                     }
-                    if(window.keyPressed(GLFW_KEY_W)) {
-                        camera.offsetCameraPosition(new Vector3f(0.0f, 0.0f, -0.05f));
+                    if (window.keyPressed(GLFW_KEY_A)) {
+                        //cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+                        camera.offsetCameraPosition(camera.getDirection().cross(new Vector3f(0.0f, 1.0f, 0.0f)).normalize().mul(cameraSpeed));
                     }
-                    if(window.keyPressed(GLFW_KEY_S)) {
-                        camera.offsetCameraPosition(new Vector3f(0.0f, 0.0f, 0.05f));
+                    if (window.keyPressed(GLFW_KEY_D)) {
+                        //cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+                        camera.offsetCameraPosition(camera.getDirection().cross(new Vector3f(0.0f, 1.0f, 0.0f)).normalize().mul(-cameraSpeed));
                     }
+
+                    Vector2f mousePosition = window.getMousePosition();
+                    Vector2f mouseOffset = new Vector2f(mousePosition).sub(previousMousePosition);
+                    previousMousePosition.set(mousePosition);
+                    float sensitivity = 0.05f;
+                    mouseOffset.mul(sensitivity);
+
+                    camera.offsetYaw(mouseOffset.x);
+                    camera.offsetPitch(mouseOffset.y);
+
 
                     transform = camera.getProjectionXView();
                     ubo.setData(transform.get(loopStack.mallocFloat(16)), 4 * 16);

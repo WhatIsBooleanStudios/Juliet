@@ -124,6 +124,18 @@ public class Window {
         return mousePosition;
     }
 
+    public void setMousePosition(Vector2f position) {
+        glfwSetCursorPos(windowHandle, position.x, position.y);
+    }
+
+    public void setCursorHidden(boolean hidden) {
+        glfwSetInputMode(windowHandle, GLFW_CURSOR, hidden ? GLFW_CURSOR_HIDDEN : GLFW_CURSOR_NORMAL);
+    }
+
+    public void captureCursor(boolean captured) {
+        glfwSetInputMode(windowHandle, GLFW_CURSOR, captured ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+    }
+
     public void dispose() {
         glfwFreeCallbacks(windowHandle);
         glfwDestroyWindow(windowHandle);
