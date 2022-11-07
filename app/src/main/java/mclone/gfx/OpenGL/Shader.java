@@ -64,30 +64,48 @@ public class Shader {
          */
         public String getFsName() { return fsName; }
 
-        private String vs;
-        private String vsName;
-        private String fs;
-        private String fsName;
+        private final String vs;
+        private final String vsName;
+        private final String fs;
+        private final String fsName;
     }
 
+    /**
+     * Describes the bindings (modifiable parameters to shaders) on a shader
+     */
     public static class ShaderBindingDescription {
+        /**
+         * Describes a uniform(shader global parameter) that can be set on the shader
+         */
         public static class UniformDescription {
+            /**
+             * Create a UniformDescription
+             * @param name The name of the uniform
+             * @param type The type of the uniform
+             */
             public UniformDescription(String name, ShaderPrimitiveType type) {
                 this.name = name;
                 this.type = type;
             }
 
+            /**
+             * @return The name of the uniform description
+             */
             String getName() { return name; }
+
+            /**
+             * @return The type of the uniform description
+             */
             ShaderPrimitiveType getType() { return type; }
 
-            String name;
-            ShaderPrimitiveType type;
+            private final String name;
+            private final ShaderPrimitiveType type;
 
             @Override
             public boolean equals(Object d) {
                 if(d.getClass() != this.getClass()) return false;
                 UniformDescription description = (UniformDescription)d;
-                return name == description.name && type == description.type;
+                return name.equals(description.name) && type == description.type;
             }
 
             @Override
@@ -96,7 +114,15 @@ public class Shader {
             }
         }
 
+        /**
+         * Describes a uniform buffer that can be bound to the shader
+         * @see UniformBuffer
+         */
         public static class UniformBufferDescription {
+            /**
+             * Create a UniformBufferDescription
+             * @param name The name of the UniformBuffer
+             */
             public UniformBufferDescription(String name) {
                 this.name = name;
             }
@@ -108,26 +134,45 @@ public class Shader {
 
             @Override
             public boolean equals(Object obj) {
+                if(obj.getClass() != this.getClass()) return false;
                 return name.equals(((UniformBufferDescription)obj).name);
             }
 
             String name;
         }
 
+        /**
+         * Create a shader binding description
+         * @param uniforms List of uniforms
+         * @param uniformBuffers List of uniform buffer bindings
+         */
         public ShaderBindingDescription(ArrayList<UniformDescription> uniforms, ArrayList<UniformBufferDescription> uniformBuffers) {
             this.uniforms = uniforms;
             this.uniformBuffers = uniformBuffers;
         }
 
-        ArrayList<UniformDescription> getUniforms() { return uniforms; }
-        ArrayList<UniformBufferDescription> getUniformBuffers() { return uniformBuffers; }
+        /**
+         * @return The uniforms in this shader binding description
+         */
+        public final ArrayList<UniformDescription> getUniforms() { return uniforms; }
 
-        ArrayList<UniformDescription> uniforms;
+        /**
+         * @return The uniform buffer descriptions of this shader binding
+         */
+        public final ArrayList<UniformBufferDescription> getUniformBuffers() { return uniformBuffers; }
 
-        ArrayList<UniformBufferDescription> uniformBuffers;
+        private ArrayList<UniformDescription> uniforms;
+
+        private ArrayList<UniformBufferDescription> uniformBuffers;
     }
 
 
+    /**
+     * Create a Shader
+     * @param shaderName The name of the shader
+     * @param src The source of the shader
+     * @param bindingDescription Description of the bindings used by the shader
+     */
     public Shader(String shaderName, ShaderSource src, ShaderBindingDescription bindingDescription) {
         id = glCreateProgram();
         this.name = shaderName;
@@ -160,18 +205,32 @@ public class Shader {
         }
     }
 
+    /**
+     * Bind the shader
+     */
     public void bind() {
         glUseProgram(id);
     }
 
+    /**
+     * Unbind this shader and set OpenGL to a state where no shaders are bound.
+     */
     public void unBind() {
         glUseProgram(0);
     }
 
+    /**
+     * Free memory and objects associated with this shader
+     */
     public void dispose() {
-        glDeleteProgram( id);
+        glDeleteProgram(id);
     }
 
+    /**
+     * Connect the shader to a uniform buffer
+     * @param name The name of the uniform buffer
+     * @param bindingPoint The binding point that the UniformBuffer is bound to
+     */
     public void setUniformBuffer(String name, int bindingPoint) {
         bind();
         int blockIndex = uniformBufferBlockIndexMap.getOrDefault(new UniformBufferDescription(name), -1);
@@ -182,6 +241,11 @@ public class Shader {
         glUniformBlockBinding(id, blockIndex, bindingPoint);
     }
 
+    /**
+     * Set a float uniform in the shader
+     * @param name The name of the uniform
+     * @param value The value of the uniform
+     */
     public void setUniformFloat(String name, float value) {
         bind();
         UniformDescription description = new UniformDescription(name, ShaderPrimitiveType.FLOAT32);
@@ -194,6 +258,11 @@ public class Shader {
         glUniform1f(location, value);
     }
 
+    /**
+     * Set an integer uniform in the shader
+     * @param name The name of the uniform
+     * @param value The value of the uniform
+     */
     public void setUniformInt(String name, int value) {
         bind();
         UniformDescription description = new UniformDescription(name, ShaderPrimitiveType.INT32);
@@ -206,6 +275,11 @@ public class Shader {
         glUniform1i(location, value);
     }
 
+    /**
+     * Set an unsigned integer uniform in the shader
+     * @param name The name of the uniform
+     * @param value The value of the uniform
+     */
     public void setUniformUint(String name, int value) {
         bind();
         UniformDescription description = new UniformDescription(name, ShaderPrimitiveType.UINT32);
@@ -217,7 +291,12 @@ public class Shader {
         Integer location = uniformLocationMap.get(description);
         glUniform1ui(location, value);
     }
-    
+
+    /**
+     * Set an 2-float vector uniform in the shader
+     * @param name The name of the uniform
+     * @param value The value of the uniform
+     */
     public void setUniformVec2(String name, Vector2f value) {
         bind();
         try(MemoryStack stack = MemoryStack.stackPush()) {
@@ -233,7 +312,12 @@ public class Shader {
         }
     }
 
-    
+
+    /**
+     * Set an 3-float vector uniform in the shader
+     * @param name The name of the uniform
+     * @param value The value of the uniform
+     */
     public void setUniformVec3(String name, Vector3f value) {
         bind();
         try(MemoryStack stack = MemoryStack.stackPush()) {
@@ -249,6 +333,11 @@ public class Shader {
         }
     }
 
+    /**
+     * Set an 4-float vector uniform in the shader
+     * @param name The name of the uniform
+     * @param value The value of the uniform
+     */
     public void setUniformVec4(String name, Vector4f value) {
         bind();
         try(MemoryStack stack = MemoryStack.stackPush()) {
@@ -264,6 +353,11 @@ public class Shader {
         }
     }
 
+    /**
+     * Set a 2x2-float matrix uniform in the shader
+     * @param name The name of the uniform
+     * @param value The value of the uniform
+     */
     public void setUniformMat2(String name, Matrix2f value) {
         bind();
         try(MemoryStack stack = MemoryStack.stackPush()) {
@@ -278,7 +372,12 @@ public class Shader {
             glUniformMatrix2fv(location, false, value.get(buffer));
         }
     }
- 
+
+    /**
+     * Set a 3x3-float matrix uniform in the shader
+     * @param name The name of the uniform
+     * @param value The value of the uniform
+     */
     public void setUniformMat3(String name, Matrix3f value) {
         bind();
         try(MemoryStack stack = MemoryStack.stackPush()) {
@@ -292,8 +391,13 @@ public class Shader {
             FloatBuffer buffer = stack.mallocFloat(9);
             glUniformMatrix3fv(location, false, value.get(buffer));
         }
-    } 
-    
+    }
+
+    /**
+     * Set a 4x4-float matrix uniform in the shader
+     * @param name The name of the uniform
+     * @param value The value of the uniform
+     */
     public void setUniformMat4(String name, Matrix4f value) {
         bind();
         try(MemoryStack stack = MemoryStack.stackPush()) {
@@ -349,7 +453,7 @@ public class Shader {
     private int id;
     private String name;
 
-    HashMap<UniformDescription, Integer> uniformLocationMap = new HashMap<>();
-    HashMap<UniformBufferDescription, Integer> uniformBufferBlockIndexMap = new HashMap<>();
+    private final HashMap<UniformDescription, Integer> uniformLocationMap = new HashMap<>();
+    private final HashMap<UniformBufferDescription, Integer> uniformBufferBlockIndexMap = new HashMap<>();
 }
 
