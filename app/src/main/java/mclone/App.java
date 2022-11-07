@@ -5,6 +5,7 @@ import mclone.gfx.OpenGL.*;
 import mclone.Platform.Window;
 
 import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import org.lwjgl.*;
 import org.lwjgl.system.Callback;
 import org.lwjgl.system.MemoryStack;
@@ -140,8 +141,20 @@ public class App {
                     window.setTitle("Window! Cursor pos: " + window.getMousePosition().get(0) + " "
                         + window.getMousePosition().get(1));
 
-                    // transform.mul(new Matrix4f().identity().rotateZ((float) (2 * Math.PI * (1 / 60.0))));
+                    if(window.keyPressed(GLFW_KEY_A)) {
+                        camera.offsetCameraPosition(new Vector3f(-0.05f, 0.0f, 0.0f));
+                    }
+                    if(window.keyPressed(GLFW_KEY_D)) {
+                        camera.offsetCameraPosition(new Vector3f(0.05f, 0.0f, 0.0f));
+                    }
+                    if(window.keyPressed(GLFW_KEY_W)) {
+                        camera.offsetCameraPosition(new Vector3f(0.0f, 0.0f, -0.05f));
+                    }
+                    if(window.keyPressed(GLFW_KEY_S)) {
+                        camera.offsetCameraPosition(new Vector3f(0.0f, 0.0f, 0.05f));
+                    }
 
+                    transform = camera.getProjectionXView();
                     ubo.setData(transform.get(loopStack.mallocFloat(16)), 4 * 16);
                     ubo.setToBindingPoint(0);
 
