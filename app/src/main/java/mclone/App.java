@@ -1,6 +1,7 @@
 package mclone;
 
 import mclone.GFX.Renderer.Camera;
+import mclone.GFX.Renderer.Model;
 import mclone.GFX.OpenGL.*;
 import mclone.Platform.Window;
 
@@ -8,7 +9,6 @@ import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.lwjgl.*;
-import org.lwjgl.system.Callback;
 import org.lwjgl.system.MemoryStack;
 
 import mclone.Logging.Logger;
@@ -17,7 +17,6 @@ import mclone.GFX.OpenGL.VertexBufferLayout.VertexAttribute;
 
 import static org.lwjgl.glfw.GLFW.*;
 
-import java.awt.*;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
@@ -95,29 +94,21 @@ public class App {
 
             String vertexShaderSource = "#version 330 core\n" +
                 "layout (location = 0) in vec3 aPos;\n" +
-                "layout (location = 1) in vec3 icolor;\n" +
-                "layout (location = 2) in vec2 itexCoord;\n" +
-                "out vec3 color;\n" +
-                "out vec2 texCoord;\n" +
                 "layout (std140) uniform Matrices {\n" +
                 "    mat4 transform;\n" +
                 "};\n" +
                 "void main()\n" +
                 "{\n" +
                 "   gl_Position = transform * vec4(aPos.x, aPos.y, aPos.z, 1.0);\n" +
-                "   color = icolor;\n" +
-                "   texCoord = itexCoord;\n" +
                 "}\0";
             String fragmentShaderSource = "#version 330 core\n" +
                 "out vec4 FragColor;\n" +
-                "in vec3 oColor;\n" +
-                "in vec2 texCoord;\n" +
-                "uniform sampler2D tex;\n" +
                 "void main()\n" +
                 "{\n" +
-                "   FragColor = texture(tex, texCoord);\n" +
+                "   FragColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);\n" +
                 "}\n";
 
+            Model model = new Model("models/scifi-blaster.glb");
 
             ShaderBuilder shaderBuilder = new ShaderBuilder();
             shaderBuilder.setShaderSource("basicVS.glsl", vertexShaderSource, "basicFS.glsl", fragmentShaderSource);
@@ -168,7 +159,7 @@ public class App {
                     Vector2f mousePosition = window.getMousePosition();
                     Vector2f mouseOffset = new Vector2f(mousePosition).sub(previousMousePosition);
                     previousMousePosition.set(mousePosition);
-                    float sensitivity = 0.05f;
+                    float sensitivity = 0.004f;
                     mouseOffset.mul(sensitivity);
 
                     camera.offsetYaw(mouseOffset.x);
@@ -181,7 +172,7 @@ public class App {
 
                     texture.bind(0);
                     shader.setUniformBuffer("Matrices", 0);
-                    GraphicsAPI.drawIndexed(shader, vbo, ibo, 6);
+                    model.tempDraw(shader);
 
                     window.swapBuffers();
 
