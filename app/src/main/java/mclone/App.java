@@ -94,18 +94,23 @@ public class App {
 
             String vertexShaderSource = "#version 330 core\n" +
                 "layout (location = 0) in vec3 aPos;\n" +
+                "layout (location = 1) in vec2 aTexCoords;\n" +
                 "layout (std140) uniform Matrices {\n" +
                 "    mat4 transform;\n" +
                 "};\n" +
+                "out vec2 texCoords;\n" +
                 "void main()\n" +
                 "{\n" +
-                "   gl_Position = transform * vec4(aPos.x, aPos.y, aPos.z, 1.0);\n" +
+                "    gl_Position = transform * vec4(aPos.x, aPos.y, aPos.z, 1.0);\n" +
+                "    texCoords = aTexCoords;\n" +
                 "}\0";
             String fragmentShaderSource = "#version 330 core\n" +
                 "out vec4 FragColor;\n" +
+                "in vec2 texCoords;\n" +
+                "uniform sampler2D s;\n" +
                 "void main()\n" +
                 "{\n" +
-                "   FragColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);\n" +
+                "   FragColor = texture(s, texCoords);\n" +
                 "}\n";
 
             Model model = new Model("models/scifi-blaster.glb");
@@ -132,7 +137,7 @@ public class App {
             // the window or has pressed the ESCAPE key.
             while (!window.shouldClose() && !window.keyPressed(GLFW_KEY_ESCAPE)) {
                 try(MemoryStack loopStack = MemoryStack.stackPush()) {
-                    GraphicsAPI.setClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+                    GraphicsAPI.setClearColor(1.0f, 1.0f, 1.0f, 1.0f);
                     GraphicsAPI.clear();
 
                     window.setTitle("Window! Cursor pos: " + window.getMousePosition().get(0) + " "
@@ -165,12 +170,10 @@ public class App {
                     camera.offsetYaw(mouseOffset.x);
                     camera.offsetPitch(mouseOffset.y);
 
-
                     transform = camera.getProjectionXView();
                     ubo.setData(transform.get(loopStack.mallocFloat(16)), 4 * 16);
                     ubo.setToBindingPoint(0);
 
-                    texture.bind(0);
                     shader.setUniformBuffer("Matrices", 0);
                     model.tempDraw(shader);
 

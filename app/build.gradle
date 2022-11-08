@@ -63,6 +63,23 @@ application {
     }
 }
 
+task runDebug(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = application.getMainClass()
+    jvmArgs = ['-javaagent:' + project.rootDir + '/debug-util/lwjglx-debug-1.0.0.jar']
+    if(OperatingSystem.current() == OperatingSystem.MAC_OS) {
+        jvmArgs('-XstartOnFirstThread')
+    }
+}
+
+task runNDebug(type: JavaExec) {
+    classpath = sourceSets.main.runtimeClasspath
+    mainClass = application.getMainClass()
+    if(OperatingSystem.current() == OperatingSystem.MAC_OS) {
+        jvmArgs('-XstartOnFirstThread')
+    }
+}
+
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(16))

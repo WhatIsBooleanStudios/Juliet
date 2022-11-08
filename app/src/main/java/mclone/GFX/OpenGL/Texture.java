@@ -8,6 +8,7 @@ import static org.lwjgl.stb.STBImage.STBI_rgb_alpha;
 import static org.lwjgl.stb.STBImage.stbi_load;
 import static org.lwjgl.stb.STBImage.stbi_image_free;
 import static org .lwjgl.stb.STBImage.stbi_set_flip_vertically_on_load;
+import static org.lwjgl.stb.STBImage.stbi_load_from_memory;
 
 import static org.lwjgl.opengl.GL33C.*;
 
@@ -35,7 +36,7 @@ public class Texture {
             return;
         }
 
-        createFromData(data, width, height);
+        createFromData(data, width, height, false);
         
         stbi_image_free(data);
     }
@@ -46,10 +47,11 @@ public class Texture {
      * @param data The texture data to be stored in the object
      * @param width The width of the image (in pixels)
      * @param height The height of the image (in pixels)
+     * @param imageFileData Whether the data is preloaded form
      */
-    public Texture(String name, ByteBuffer data, int[] width, int[] height) {
+    public Texture(String name, ByteBuffer data, int[] width, int[] height, boolean imageFileData) {
         this.name = name;
-        createFromData(data, width, height);
+        createFromData(data, width, height, imageFileData);
     }
 
     /**
@@ -84,7 +86,16 @@ public class Texture {
     }
 
 
-    private void createFromData(ByteBuffer data, int[] width, int[] height) {
+    private void createFromData(ByteBuffer data, int[] width, int[] height, boolean imageFileData) {
+        ByteBuffer imageData;
+        int[] imageWidth = {width[0]};
+        int[] imageHeight = {height[0]};
+        int[] numChannels = {0};
+        if(!imageFileData) {
+            imageData = data;
+        } else {
+            imageData = stbi_load_from_memory(data, imageWidth, imageHeight, numChannels, 4);
+        }
         id = glGenTextures();
         glBindTexture(GL_TEXTURE_2D, id);
         glBindTexture(GL_TEXTURE_2D, id);
@@ -94,8 +105,15 @@ public class Texture {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         
         int imageType = GL_RGBA;
-        glTexImage2D(GL_TEXTURE_2D, 0, imageType, width[0], height[0], 0, imageType, GL_UNSIGNED_BYTE, data);
+        Logger.trace("MaxSize: " + glGetInteger(GL_MAX_TEXTURE_SIZE));
+        Logger.trace("Width: " + imageWidth[0]);
+        Logger.trace("Height: " + imageHeight[0]);
+        glTexImage2D(GL_TEXTURE_2D, 0, imageType, imageWidth[0], imageHeight[0], 0, imageType, GL_UNSIGNED_BYTE, imageData);
         glGenerateMipmap(GL_TEXTURE_2D);
+
+        if(imageFileData) {
+            stbi_image_free(imageData);
+        }
     }
 
 
