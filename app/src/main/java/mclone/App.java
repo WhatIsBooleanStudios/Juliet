@@ -113,7 +113,7 @@ public class App {
                 "   FragColor = texture(s, texCoords);\n" +
                 "}\n";
 
-            Model model = new Model("models/scifi-blaster.glb");
+            Model model = new Model("models/gizmo.glb");
 
             ShaderBuilder shaderBuilder = new ShaderBuilder();
             shaderBuilder.setShaderSource("basicVS.glsl", vertexShaderSource, "basicFS.glsl", fragmentShaderSource);

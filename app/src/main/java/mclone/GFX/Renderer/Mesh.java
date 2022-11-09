@@ -58,13 +58,6 @@ public class Mesh {
                 for (int j = 0; j < face.mNumIndices(); j++) {
                     indexBufferData.put(currentIndex, face.mIndices().get(j));
                     currentIndex++;
-
-                    /*int vertexIndex = face.mIndices().get(j);
-                    vertexBufferData.put(vertexIndex * 5, mesh.mVertices().get(vertexIndex).x());
-                    vertexBufferData.put(vertexIndex * 5 + 1, mesh.mVertices().get(vertexIndex).y());
-                    vertexBufferData.put(vertexIndex * 5 + 2, mesh.mVertices().get(vertexIndex).z());
-                    vertexBufferData.put(vertexIndex * 5 + 3, mesh.mTextureCoords(0).get(vertexIndex).x());
-                    vertexBufferData.put(vertexIndex * 5 + 4, mesh.mTextureCoords(0).get(vertexIndex).y());*/
                 }
             }
 
