@@ -11,7 +11,7 @@ public class Camera {
      * @param fovY The vertical Y of the camera
      */
     public Camera(float aspectRatio, float fovY) {
-        this.projection = new Matrix4f().perspective(fovY, aspectRatio, 0.1f, 100.0f);
+        this.projection = new Matrix4f().perspective(fovY, aspectRatio, 0.01f, 100.0f);
         this.projectionXView = calculate();
     }
 
@@ -23,7 +23,7 @@ public class Camera {
         Vector3f direction = getDirection();
         direction.add(cameraPosition);
         Matrix4f tProjection = new Matrix4f(this.projection);
-        return tProjection.mul(new Matrix4f().identity().lookAt(direction, cameraPosition, new Vector3f(0.0f,1.0f,0.0f)));
+        return tProjection.mul(new Matrix4f().identity().lookAt(cameraPosition, direction, new Vector3f(0.0f,1.0f,0.0f)));
     }
 
     /**

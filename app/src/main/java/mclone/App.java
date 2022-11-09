@@ -121,6 +121,8 @@ public class App {
             Shader shader = shaderBuilder.createShader("BasicShader");
 
             Camera camera = new Camera(4.0f / 3.0f, 45.0f);
+            camera.offsetCameraPosition(new Vector3f(0.0f, 0.0f, -1.0f));
+            camera.setYaw((float)Math.PI);
             Matrix4f transform = camera.getProjectionXView();
 
             UniformBuffer ubo = new UniformBuffer(null, 64, HardwareBuffer.UsageHints.USAGE_DYNAMIC);
@@ -143,32 +145,32 @@ public class App {
                     window.setTitle("Window! Cursor pos: " + window.getMousePosition().get(0) + " "
                         + window.getMousePosition().get(1));
 
-                    final float cameraSpeed = 0.05f; // adjust accordingly
+                    final float cameraSpeed = 0.01f; // adjust accordingly
                     if (window.keyPressed(GLFW_KEY_W)) {
                         //cameraPos += cameraSpeed * cameraFront;
-                        camera.offsetCameraPosition(camera.getDirection().mul(-cameraSpeed));
+                        camera.offsetCameraPosition(camera.getDirection().mul(cameraSpeed));
                     }
                     if (window.keyPressed(GLFW_KEY_S)) {
                         //cameraPos -= cameraSpeed * cameraFront;
-                        camera.offsetCameraPosition(camera.getDirection().mul(cameraSpeed));
+                        camera.offsetCameraPosition(camera.getDirection().mul(-cameraSpeed));
                     }
                     if (window.keyPressed(GLFW_KEY_A)) {
                         //cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-                        camera.offsetCameraPosition(camera.getDirection().cross(new Vector3f(0.0f, 1.0f, 0.0f)).normalize().mul(cameraSpeed));
+                        camera.offsetCameraPosition(camera.getDirection().cross(new Vector3f(0.0f, 1.0f, 0.0f)).normalize().mul(-cameraSpeed));
                     }
                     if (window.keyPressed(GLFW_KEY_D)) {
                         //cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-                        camera.offsetCameraPosition(camera.getDirection().cross(new Vector3f(0.0f, 1.0f, 0.0f)).normalize().mul(-cameraSpeed));
+                        camera.offsetCameraPosition(camera.getDirection().cross(new Vector3f(0.0f, 1.0f, 0.0f)).normalize().mul(cameraSpeed));
                     }
 
                     Vector2f mousePosition = window.getMousePosition();
                     Vector2f mouseOffset = new Vector2f(mousePosition).sub(previousMousePosition);
                     previousMousePosition.set(mousePosition);
-                    float sensitivity = 0.004f;
+                    float sensitivity = 0.001f;
                     mouseOffset.mul(sensitivity);
 
                     camera.offsetYaw(mouseOffset.x);
-                    camera.offsetPitch(mouseOffset.y);
+                    camera.offsetPitch(-mouseOffset.y);
 
                     transform = camera.getProjectionXView();
                     ubo.setData(transform.get(loopStack.mallocFloat(16)), 4 * 16);
