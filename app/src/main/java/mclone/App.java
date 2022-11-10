@@ -1,6 +1,7 @@
 package mclone;
 
 import mclone.GFX.Renderer.Camera;
+import mclone.GFX.Renderer.FPSCameraController;
 import mclone.GFX.Renderer.Model;
 import mclone.GFX.OpenGL.*;
 import mclone.Platform.Window;
@@ -56,41 +57,7 @@ public class App {
     }
 
     private void loop() {
-        // This line is critical for LWJGL's interoperation with GLFW's
-        // OpenGL context, or any context that is managed externally.
-        // LWJGL detects the context that is current in the current thread,
-        // creates the GLCapabilities instance and makes the OpenGL
-        // bindings available for use.
         try(MemoryStack stack = MemoryStack.stackPush()) {
-
-            // Set the clear color
-
-            float[] vertices = {
-                -0.5f, -0.5f, 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
-                 0.5f, -0.5f, 1.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f,
-                 0.5f,  0.5f, 1.0f, 0.0f, 1.0f, 1.0f, 1.0f, 1.0f,
-                 -0.5f, 0.5f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f
-            };
-
-            int[] indices = {
-                0, 1, 2,
-                2, 3, 0
-            };
-
-            ArrayList<VertexAttribute> attributes = new ArrayList<>();
-            attributes.add(new VertexAttribute(ShaderPrimitiveType.FLOAT32, 3));
-            attributes.add(new VertexAttribute(ShaderPrimitiveType.FLOAT32, 3));
-            attributes.add(new VertexAttribute(ShaderPrimitiveType.FLOAT32, 2));
-            VertexBufferLayout vboLayout = new VertexBufferLayout(attributes);
-            FloatBuffer fb = stack.mallocFloat(vertices.length);
-            fb.put(vertices).flip();
-
-            IntBuffer ib = stack.mallocInt(6);
-            ib.put(indices);
-            ib.flip();
-            
-            VertexBuffer vbo = new VertexBuffer(fb, vertices.length * 4, HardwareBuffer.UsageHints.USAGE_STATIC, vboLayout);
-            IndexBuffer  ibo = new IndexBuffer(ib, indices.length * 4, HardwareBuffer.UsageHints.USAGE_STATIC);
 
             String vertexShaderSource = "#version 330 core\n" +
                 "layout (location = 0) in vec3 aPos;\n" +
@@ -113,25 +80,17 @@ public class App {
                 "   FragColor = texture(s, texCoords);\n" +
                 "}\n";
 
-            Model model = new Model("models/gizmo.glb");
 
             ShaderBuilder shaderBuilder = new ShaderBuilder();
             shaderBuilder.setShaderSource("basicVS.glsl", vertexShaderSource, "basicFS.glsl", fragmentShaderSource);
             shaderBuilder.addUniformBuffer("Matrices");
             Shader shader = shaderBuilder.createShader("BasicShader");
 
-            Camera camera = new Camera(4.0f / 3.0f, 45.0f);
-            camera.offsetCameraPosition(new Vector3f(0.0f, 0.0f, -1.0f));
-            camera.setYaw((float)Math.PI);
-            Matrix4f transform = camera.getProjectionXView();
-
-            UniformBuffer ubo = new UniformBuffer(null, 64, HardwareBuffer.UsageHints.USAGE_DYNAMIC);
-
-            Texture texture = new Texture("textures/waves.jpeg");
+            Model model = new Model("models/gizmo.glb");
+            FPSCameraController fpsCameraController = new FPSCameraController(window, new Vector3f(0.0f, 0.0f, -1.0f), 0.0f, 0.0f);
 
             Vector2f screenCenter = new Vector2f(window.getWidth() / 2.0f, window.getHeight() / 2.0f);
             window.setMousePosition(screenCenter);
-            Vector2f previousMousePosition = window.getMousePosition();
             window.captureCursor(true);
 
             
@@ -145,36 +104,8 @@ public class App {
                     window.setTitle("Window! Cursor pos: " + window.getMousePosition().get(0) + " "
                         + window.getMousePosition().get(1));
 
-                    final float cameraSpeed = 0.01f; // adjust accordingly
-                    if (window.keyPressed(GLFW_KEY_W)) {
-                        //cameraPos += cameraSpeed * cameraFront;
-                        camera.offsetCameraPosition(camera.getDirection().mul(cameraSpeed));
-                    }
-                    if (window.keyPressed(GLFW_KEY_S)) {
-                        //cameraPos -= cameraSpeed * cameraFront;
-                        camera.offsetCameraPosition(camera.getDirection().mul(-cameraSpeed));
-                    }
-                    if (window.keyPressed(GLFW_KEY_A)) {
-                        //cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-                        camera.offsetCameraPosition(camera.getDirection().cross(new Vector3f(0.0f, 1.0f, 0.0f)).normalize().mul(-cameraSpeed));
-                    }
-                    if (window.keyPressed(GLFW_KEY_D)) {
-                        //cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-                        camera.offsetCameraPosition(camera.getDirection().cross(new Vector3f(0.0f, 1.0f, 0.0f)).normalize().mul(cameraSpeed));
-                    }
-
-                    Vector2f mousePosition = window.getMousePosition();
-                    Vector2f mouseOffset = new Vector2f(mousePosition).sub(previousMousePosition);
-                    previousMousePosition.set(mousePosition);
-                    float sensitivity = 0.001f;
-                    mouseOffset.mul(sensitivity);
-
-                    camera.offsetYaw(mouseOffset.x);
-                    camera.offsetPitch(-mouseOffset.y);
-
-                    transform = camera.getProjectionXView();
-                    ubo.setData(transform.get(loopStack.mallocFloat(16)), 4 * 16);
-                    ubo.setToBindingPoint(0);
+                    fpsCameraController.update(window);
+                    fpsCameraController.setUniformBindingPoint(0);
 
                     shader.setUniformBuffer("Matrices", 0);
                     model.tempDraw(shader);
@@ -185,11 +116,7 @@ public class App {
                 }
             }
 
-            ibo.dispose();
-            vbo.dispose();
-            ubo.dispose();
             shader.dispose();
-            texture.dispose();
         }
 
 

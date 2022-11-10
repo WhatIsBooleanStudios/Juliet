@@ -11,7 +11,7 @@ public class Camera {
      * @param fovY The vertical Y of the camera
      */
     public Camera(float aspectRatio, float fovY) {
-        this.projection = new Matrix4f().perspective(fovY, aspectRatio, 0.01f, 100.0f);
+        this.projection = new Matrix4f().perspective(fovY, aspectRatio, 0.08f, 100.0f);
         this.projectionXView = calculate();
     }
 
@@ -27,7 +27,7 @@ public class Camera {
     }
 
     /**
-     *
+     * @return The direction that the camera is pointing in
      */
     public Vector3f getDirection() {
         Vector3f direction = new Vector3f((float)Math.cos(this.yaw - (float)(Math.PI / 2.0f)) * (float)Math.cos(this.pitch),
@@ -45,42 +45,42 @@ public class Camera {
      * Sets the pitch of the direction view
      * @param pitch The pitch to overwrite
      */
-    public void setPitch(float pitch) { this.pitch = pitch; this.projectionXView = calculate(); }
+    public void setPitch(float pitch) { this.pitch = pitch; this.projectionXView.set(calculate()); }
 
     /**
      * Offsets the current pitch value
      * @param pitch The pitch to offset by
      */
-    public void offsetPitch(float pitch) { this.pitch += pitch; this.projectionXView = calculate(); }
+    public void offsetPitch(float pitch) { this.pitch += pitch; this.projectionXView.set(calculate()); }
 
     /**
      * Sets the yaw of the direction view
      * @param yaw The yaw to overwrite
      */
-    public void setYaw(float yaw) { this.yaw = yaw; this.projectionXView = calculate(); }
+    public void setYaw(float yaw) { this.yaw = yaw; this.projectionXView.set(calculate()); }
 
     /**
      * Offsets the current yaw value
      * @param yaw The yaw to offset by
      */
-    public void offsetYaw(float yaw) { this.yaw += yaw; this.projectionXView = calculate(); }
+    public void offsetYaw(float yaw) { this.yaw += yaw; this.projectionXView.set(calculate()); }
 
     /**
      * Sets the position of the camera
      * @param cameraPosition The new position of the camera
      */
-    public void setCameraPosition(Vector3f cameraPosition) { this.cameraPosition = cameraPosition; this.projectionXView = calculate(); }
+    public void setCameraPosition(Vector3f cameraPosition) { this.cameraPosition.set(cameraPosition); this.projectionXView.set(calculate()); }
 
     /**
      * Offsets the current camera position
      * @param cameraPosition The position to offset the current camera by
      */
-    public void offsetCameraPosition(Vector3f cameraPosition) { this.cameraPosition.add(cameraPosition); this.projectionXView = calculate(); }
+    public void offsetCameraPosition(Vector3f cameraPosition) { this.cameraPosition.add(cameraPosition); this.projectionXView.set(calculate()); }
 
-    private Vector3f cameraPosition = new Vector3f(0.0f,0.0f,0.0f);
+    private final Vector3f cameraPosition = new Vector3f(0.0f,0.0f,0.0f);
     private float pitch = 0.0f;
     private float yaw = 0.0f;
     private static final float roll = 0.0f;
-    final Matrix4f projection;
-    Matrix4f projectionXView;
+    private final Matrix4f projection;
+    private final Matrix4f projectionXView;
 }
