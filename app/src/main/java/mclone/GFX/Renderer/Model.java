@@ -101,7 +101,8 @@ public class Model {
         }
     }
 
-    Mesh[] meshes;
+    protected Mesh[] getMeshes() { return meshes; }
+    private Mesh[] meshes;
     ArrayList<Texture> textures = new ArrayList<>();
     ArrayList<Material> materials = new ArrayList<>();
 }

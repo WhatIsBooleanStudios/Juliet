@@ -9,7 +9,7 @@ import org.lwjgl.system.MemoryStack;
 
 import static org.lwjgl.glfw.GLFW.*;
 
-public class FPSCameraController {
+public class FPSCameraController extends CameraController {
     public FPSCameraController(Window window, Vector3f position, float pitch, float yaw) {
         this.camera = new Camera((float)window.getWidth() / (float) window.getHeight(), (float)Math.PI / 4.0f);
         this.camera.setCameraPosition(position);
@@ -60,7 +60,8 @@ public class FPSCameraController {
         }
     }
 
-    public void setUniformBindingPoint(int binding) {
+    @Override
+    protected void bindToBindingPoint(int binding) {
         ubo.setToBindingPoint(binding);
     }
 

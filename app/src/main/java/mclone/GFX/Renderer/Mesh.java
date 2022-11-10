@@ -75,6 +75,18 @@ public class Mesh {
         GraphicsAPI.drawIndexed(shader, vbo, ibo, indexCount);
     }
 
+    protected final VertexBuffer getVertexBuffer() {
+        return vbo;
+    }
+
+    protected final IndexBuffer getIndexBuffer() {
+        return ibo;
+    }
+
+    public int getVertexCount() { return vertexCount; }
+    public int getIndexCount() { return indexCount; }
+    public final Material getMaterial() { return material; }
+
     private int vertexCount;
     private VertexBuffer vbo;
 

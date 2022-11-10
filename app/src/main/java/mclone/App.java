@@ -4,6 +4,7 @@ import mclone.GFX.Renderer.Camera;
 import mclone.GFX.Renderer.FPSCameraController;
 import mclone.GFX.Renderer.Model;
 import mclone.GFX.OpenGL.*;
+import mclone.GFX.Renderer.Renderer;
 import mclone.Platform.Window;
 
 import org.joml.Matrix4f;
@@ -59,33 +60,6 @@ public class App {
     private void loop() {
         try(MemoryStack stack = MemoryStack.stackPush()) {
 
-            String vertexShaderSource = "#version 330 core\n" +
-                "layout (location = 0) in vec3 aPos;\n" +
-                "layout (location = 1) in vec2 aTexCoords;\n" +
-                "layout (std140) uniform Matrices {\n" +
-                "    mat4 transform;\n" +
-                "};\n" +
-                "out vec2 texCoords;\n" +
-                "void main()\n" +
-                "{\n" +
-                "    gl_Position = transform * vec4(aPos.x, aPos.y, aPos.z, 1.0);\n" +
-                "    texCoords = aTexCoords;\n" +
-                "}\0";
-            String fragmentShaderSource = "#version 330 core\n" +
-                "out vec4 FragColor;\n" +
-                "in vec2 texCoords;\n" +
-                "uniform sampler2D s;\n" +
-                "void main()\n" +
-                "{\n" +
-                "   FragColor = texture(s, texCoords);\n" +
-                "}\n";
-
-
-            ShaderBuilder shaderBuilder = new ShaderBuilder();
-            shaderBuilder.setShaderSource("basicVS.glsl", vertexShaderSource, "basicFS.glsl", fragmentShaderSource);
-            shaderBuilder.addUniformBuffer("Matrices");
-            Shader shader = shaderBuilder.createShader("BasicShader");
-
             Model model = new Model("models/gizmo.glb");
             FPSCameraController fpsCameraController = new FPSCameraController(window, new Vector3f(0.0f, 0.0f, -1.0f), 0.0f, 0.0f);
 
@@ -93,7 +67,8 @@ public class App {
             window.setMousePosition(screenCenter);
             window.captureCursor(true);
 
-            
+            Renderer renderer = new Renderer();
+
             // Run the rendering loop until the user has attempted to close
             // the window or has pressed the ESCAPE key.
             while (!window.shouldClose() && !window.keyPressed(GLFW_KEY_ESCAPE)) {
@@ -105,18 +80,16 @@ public class App {
                         + window.getMousePosition().get(1));
 
                     fpsCameraController.update(window);
-                    fpsCameraController.setUniformBindingPoint(0);
 
-                    shader.setUniformBuffer("Matrices", 0);
-                    model.tempDraw(shader);
+                    renderer.begin(fpsCameraController);
+                    renderer.drawModel(model);
+                    renderer.end();
 
                     window.swapBuffers();
 
                     Window.windowSystemPollEvents();
                 }
             }
-
-            shader.dispose();
         }
 
 
