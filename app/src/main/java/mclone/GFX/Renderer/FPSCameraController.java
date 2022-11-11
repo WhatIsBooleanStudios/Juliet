@@ -24,7 +24,6 @@ public class FPSCameraController extends CameraController {
         try(MemoryStack stack = MemoryStack.stackPush()) {
             if (firstUpdate) {
                 previousMousePosition.set(window.getMousePosition());
-                firstUpdate = false;
             }
             final float cameraSpeed = 0.01f; // adjust accordingly
             boolean positionModified = false;
@@ -54,9 +53,10 @@ public class FPSCameraController extends CameraController {
             camera.offsetYaw(mouseOffset.x);
             camera.offsetPitch(-mouseOffset.y);
 
-            if (mouseOffset.x != 0 || mouseOffset.y != 0 || positionModified) {
+            if (firstUpdate || mouseOffset.x != 0 || mouseOffset.y != 0 || positionModified) {
                 ubo.setData(camera.getProjectionXView().get(stack.mallocFloat(16)), 16 * 4);
             }
+            firstUpdate = false;
         }
     }
 
