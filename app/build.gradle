@@ -85,3 +85,9 @@ java {
         languageVersion.set(JavaLanguageVersion.of(16))
     }
 }
+
+jar {
+    manifest {
+        attributes 'Main-Class': application.getMainClassName()
+    }
+}

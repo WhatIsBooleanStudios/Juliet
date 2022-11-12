@@ -1,11 +1,6 @@
 package mclone.GFX.OpenGL;
 
-import org.joml.Matrix2f;
-import org.joml.Matrix3f;
-import org.joml.Matrix4f;
-import org.joml.Vector2f;
-import org.joml.Vector3f;
-import org.joml.Vector4f;
+import org.joml.*;
 import org.lwjgl.system.MemoryStack;
 
 import mclone.Logging.Logger;
@@ -297,7 +292,7 @@ public class Shader {
      * @param name The name of the uniform
      * @param value The value of the uniform
      */
-    public void setUniformVec2(String name, Vector2f value) {
+    public void setUniformVec2(String name, Vector2fc value) {
         bind();
         try(MemoryStack stack = MemoryStack.stackPush()) {
             UniformDescription description = new UniformDescription(name, ShaderPrimitiveType.VEC2);
@@ -318,7 +313,7 @@ public class Shader {
      * @param name The name of the uniform
      * @param value The value of the uniform
      */
-    public void setUniformVec3(String name, Vector3f value) {
+    public void setUniformVec3(String name, Vector3fc value) {
         bind();
         try(MemoryStack stack = MemoryStack.stackPush()) {
             UniformDescription description = new UniformDescription(name, ShaderPrimitiveType.VEC3);
@@ -338,7 +333,7 @@ public class Shader {
      * @param name The name of the uniform
      * @param value The value of the uniform
      */
-    public void setUniformVec4(String name, Vector4f value) {
+    public void setUniformVec4(String name, Vector4fc value) {
         bind();
         try(MemoryStack stack = MemoryStack.stackPush()) {
             UniformDescription description = new UniformDescription(name, ShaderPrimitiveType.VEC4);
@@ -358,7 +353,7 @@ public class Shader {
      * @param name The name of the uniform
      * @param value The value of the uniform
      */
-    public void setUniformMat2(String name, Matrix2f value) {
+    public void setUniformMat2(String name, Matrix2fc value) {
         bind();
         try(MemoryStack stack = MemoryStack.stackPush()) {
             UniformDescription description = new UniformDescription(name, ShaderPrimitiveType.MAT2);
@@ -378,7 +373,7 @@ public class Shader {
      * @param name The name of the uniform
      * @param value The value of the uniform
      */
-    public void setUniformMat3(String name, Matrix3f value) {
+    public void setUniformMat3(String name, Matrix3fc value) {
         bind();
         try(MemoryStack stack = MemoryStack.stackPush()) {
             UniformDescription description = new UniformDescription(name, ShaderPrimitiveType.MAT3);
@@ -398,7 +393,7 @@ public class Shader {
      * @param name The name of the uniform
      * @param value The value of the uniform
      */
-    public void setUniformMat4(String name, Matrix4f value) {
+    public void setUniformMat4(String name, Matrix4fc value) {
         bind();
         try(MemoryStack stack = MemoryStack.stackPush()) {
             UniformDescription description = new UniformDescription(name, ShaderPrimitiveType.MAT4);

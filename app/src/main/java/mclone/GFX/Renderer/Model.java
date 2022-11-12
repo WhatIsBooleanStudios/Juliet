@@ -24,6 +24,7 @@ public class Model {
                 aiProcess_JoinIdenticalVertices | aiProcess_Triangulate | aiProcess_FixInfacingNormals |
                     aiProcess_RemoveRedundantMaterials
             );
+
             if (scene == null) {
                 Logger.error("Model.new", this, "Failed to load model \"" + path + "\"");
                 return;
@@ -32,27 +33,11 @@ public class Model {
             AIString sceneName = scene.mName();
             Logger.trace("Scene name: " + sceneName.dataString());
 
+            createInternalTextures(scene, sceneName);
+
             int numMaterials = scene.mNumMaterials();
             Logger.trace("num materials: " + numMaterials);
             PointerBuffer aiMaterials = scene.mMaterials();
-
-            int numInternalTextures = scene.mNumTextures();
-            Logger.trace("numInternalTextures: " + numInternalTextures);
-            if (numInternalTextures > 0) {
-                for (int i = 0; i < numInternalTextures; i++) {
-                    AITexture aiTexture = AITexture.create(scene.mTextures().get(i));
-                    this.textures.add(
-                        new Texture(
-                            sceneName.dataString() + "_tex" + i,
-                            aiTexture.pcDataCompressed(),
-                            new int[]{aiTexture.mWidth()},
-                            new int[]{aiTexture.mHeight()},
-                            aiTexture.mHeight() == 0
-                        )
-                    );
-                }
-            }
-
             for (int i = 0; i < numMaterials; i++) {
                 AIMaterial material = AIMaterial.create(aiMaterials.get());
                 processMaterial(material);
@@ -68,6 +53,25 @@ public class Model {
         }
     }
 
+    private void createInternalTextures(AIScene scene, AIString sceneName) {
+        int numInternalTextures = scene.mNumTextures();
+        Logger.trace("numInternalTextures: " + numInternalTextures);
+        if (numInternalTextures > 0) {
+            for (int i = 0; i < numInternalTextures; i++) {
+                AITexture aiTexture = AITexture.create(scene.mTextures().get(i));
+                this.textures.add(
+                    new Texture(
+                        sceneName.dataString() + "_tex" + i,
+                        aiTexture.pcDataCompressed(),
+                        new int[]{aiTexture.mWidth()},
+                        new int[]{aiTexture.mHeight()},
+                        aiTexture.mHeight() == 0
+                    )
+                );
+            }
+        }
+    }
+
     private void processMaterial(AIMaterial material) {
         AIString name = AIString.calloc();
         Assimp.aiGetMaterialString(material, AI_MATKEY_NAME, 0, 0, name);
@@ -75,41 +79,39 @@ public class Model {
         AIString diffuseTexturePath = AIString.calloc();
         Assimp.aiGetMaterialTexture(material, aiTextureType_DIFFUSE, 0, diffuseTexturePath, (IntBuffer) null, null, null, null, null, null);
 
-        Assimp.aiGetMaterialColor(material, AI_MATKEY_COLOR_DIFFUSE, )
+        AIColor4D color4D = AIColor4D.calloc();
+        Assimp.aiGetMaterialColor(material, AI_MATKEY_COLOR_DIFFUSE, 0, 0, color4D);
+        Logger.trace("Color: " + color4D.r() + " " + color4D.g() + " " + color4D.b());
 
         Logger.trace("Material name: " + name.dataString());
         Logger.trace("Material path: " + diffuseTexturePath.dataString());
 
-        if(diffuseTexturePath.length() > 1 && diffuseTexturePath.dataString().charAt(0) == '*') {
+        if (diffuseTexturePath.length() > 1 && diffuseTexturePath.dataString().charAt(0) == '*') {
             try {
                 int textureIndex = Integer.parseInt(diffuseTexturePath.dataString().substring(1), 10);
-                if(textureIndex >= this.textures.size()) {
+                if (textureIndex >= this.textures.size()) {
                     Logger.error("Model.processMaterial", this, "Loaded material references nonexistent internal texture!");
                     return;
                 }
                 materials.add(new Material(name.dataString(), textures.get(textureIndex)));
-            } catch(NumberFormatException ignored) {}
+            } catch (NumberFormatException ignored) {
+            }
         } else {
-            // TODO: check if the texture is already in the array. Perhaps we should create a textureCache database
-            Texture newTexture = new Texture(Paths.get(this.path).getParent() + "/" + diffuseTexturePath.dataString());
-            textures.add(newTexture);
-            materials.add(new Material(diffuseTexturePath.dataString(), newTexture));
+            materials.add(new Material(diffuseTexturePath.dataString(), TextureCache.load(Paths.get(path).getParent() + "/" + diffuseTexturePath.dataString())));
         }
 
+        color4D.free();
         name.free();
         diffuseTexturePath.free();
     }
 
-    public void tempDraw(Shader shader) {
-        for (int i = 0; i < meshes.length; i++) {
-            meshes[i].tempDraw(shader);
-        }
+    protected final Mesh[] getMeshes() {
+        return meshes;
     }
 
-    protected Mesh[] getMeshes() { return meshes; }
     private Mesh[] meshes;
-    ArrayList<Texture> textures = new ArrayList<>();
-    ArrayList<Material> materials = new ArrayList<>();
+    private final ArrayList<Texture> textures = new ArrayList<>();
+    private final ArrayList<Material> materials = new ArrayList<>();
 
     private final String path;
 }

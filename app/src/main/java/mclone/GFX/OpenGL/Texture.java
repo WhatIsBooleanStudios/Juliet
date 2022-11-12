@@ -55,6 +55,11 @@ public class Texture {
     }
 
     /**
+     * @return Whether the texture has been loaded successfully or not
+     */
+    public boolean loaded() { return id >= 0; }
+
+    /**
      * Bind the texture
      */
     private void bind() {

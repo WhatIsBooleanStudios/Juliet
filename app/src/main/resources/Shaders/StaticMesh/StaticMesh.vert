@@ -7,9 +7,11 @@ layout (std140) uniform Camera {
     mat4 transform;
 } camera;
 
+uniform vec3 uTranslation;
+
 out vec2 texCoords;
 
 void main() {
-    gl_Position = camera.transform * vec4(vertPos, 1.0);
+    gl_Position = camera.transform * vec4(vertPos + uTranslation, 1.0);
     texCoords = vertTexCoords;
 }

@@ -40,11 +40,6 @@ public class App {
 
     private void init() {
         Logger.initialize(true, "log.txt");
-        Logger.info(this, "LWJGL VERSION " + Version.getVersion());
-        Logger.error("App.init", this, "This is an example error message");
-        Logger.warn("App.init", this, "This is an example warn message");
-        Logger.trace("App.init", this, "This is an example trace message");
-        Logger.info("App.init", this, "This is an example info message");
         Window.initializeWindowSystem();
 
         window = new Window("Window!", 1024, 768, false);
@@ -61,6 +56,7 @@ public class App {
         try(MemoryStack stack = MemoryStack.stackPush()) {
 
             Model model = new Model("models/gizmo.gltf");
+            Model tableModel = new Model("models/basicTable.gltf");
             FPSCameraController fpsCameraController = new FPSCameraController(window, new Vector3f(0.0f, 0.0f, -1.0f), 0.0f, (float)Math.PI);
 
             Vector2f screenCenter = new Vector2f(window.getWidth() / 2.0f, window.getHeight() / 2.0f);
@@ -82,7 +78,7 @@ public class App {
                     fpsCameraController.update(window);
 
                     renderer.begin(fpsCameraController);
-                    renderer.drawModel(model);
+                    renderer.drawModel(model, new Vector3f(0.1f, 0.0f, 0.0f));
                     renderer.end();
 
                     window.swapBuffers();
@@ -90,6 +86,8 @@ public class App {
                     Window.windowSystemPollEvents();
                 }
             }
+
+            renderer.shutdown();
         }
 
 
