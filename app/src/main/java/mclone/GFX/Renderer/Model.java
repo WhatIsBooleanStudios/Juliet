@@ -11,11 +11,13 @@ import mclone.GFX.OpenGL.Shader;
 import mclone.Logging.Logger;
 
 import java.nio.IntBuffer;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Model {
     public Model(String path) {
+        this.path = new String(path);
         try (MemoryStack stack = MemoryStack.stackPush()) {
             AIScene scene = aiImportFile(
                 path,
@@ -24,6 +26,7 @@ public class Model {
             );
             if (scene == null) {
                 Logger.error("Model.new", this, "Failed to load model \"" + path + "\"");
+                return;
             }
 
             AIString sceneName = scene.mName();
@@ -72,6 +75,8 @@ public class Model {
         AIString diffuseTexturePath = AIString.calloc();
         Assimp.aiGetMaterialTexture(material, aiTextureType_DIFFUSE, 0, diffuseTexturePath, (IntBuffer) null, null, null, null, null, null);
 
+        Assimp.aiGetMaterialColor(material, AI_MATKEY_COLOR_DIFFUSE, )
+
         Logger.trace("Material name: " + name.dataString());
         Logger.trace("Material path: " + diffuseTexturePath.dataString());
 
@@ -86,7 +91,7 @@ public class Model {
             } catch(NumberFormatException ignored) {}
         } else {
             // TODO: check if the texture is already in the array. Perhaps we should create a textureCache database
-            Texture newTexture = new Texture(diffuseTexturePath.dataString());
+            Texture newTexture = new Texture(Paths.get(this.path).getParent() + "/" + diffuseTexturePath.dataString());
             textures.add(newTexture);
             materials.add(new Material(diffuseTexturePath.dataString(), newTexture));
         }
@@ -105,5 +110,7 @@ public class Model {
     private Mesh[] meshes;
     ArrayList<Texture> textures = new ArrayList<>();
     ArrayList<Material> materials = new ArrayList<>();
+
+    private final String path;
 }
 

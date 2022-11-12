@@ -60,8 +60,8 @@ public class App {
     private void loop() {
         try(MemoryStack stack = MemoryStack.stackPush()) {
 
-            Model model = new Model("models/gizmo.glb");
-            FPSCameraController fpsCameraController = new FPSCameraController(window, new Vector3f(0.0f, 0.0f, -1.0f), 0.0f, 0.0f);
+            Model model = new Model("models/gizmo.gltf");
+            FPSCameraController fpsCameraController = new FPSCameraController(window, new Vector3f(0.0f, 0.0f, -1.0f), 0.0f, (float)Math.PI);
 
             Vector2f screenCenter = new Vector2f(window.getWidth() / 2.0f, window.getHeight() / 2.0f);
             window.setMousePosition(screenCenter);
