@@ -21,18 +21,25 @@ public class Renderer {
         );
         shaderBuilder.addUniformBuffer("Camera");
         shaderBuilder.addUniform("uTranslation", ShaderPrimitiveUtil.ShaderPrimitiveType.VEC3);
+        shaderBuilder.addUniform("camPos", ShaderPrimitiveUtil.ShaderPrimitiveType.VEC3);
         this.shader = shaderBuilder.createShader("StaticMeshShader");
     }
 
     public void begin(CameraController camera) {
+        currentCamera = camera;
         camera.bindToBindingPoint(0);
         shader.setUniformBuffer("Camera", 0);
     }
 
     public void drawModel(Model model, Vector3fc position) {
         for(Mesh mesh : model.getMeshes()) {
+            shader.bind();
             mesh.getMaterial().getDiffuse().bind(0);
+            mesh.getMaterial().getNormal().bind(1);
+            mesh.getMaterial().getMetallic().bind(2);
+            mesh.getMaterial().getRoughness().bind(3);
             shader.setUniformVec3("uTranslation", position);
+            shader.setUniformVec3("camPos", currentCamera.getCameraPosition());
             GraphicsAPI.drawIndexed(shader, mesh.getVertexBuffer(), mesh.getIndexBuffer(), mesh.getIndexCount());
         }
     }
@@ -45,5 +52,6 @@ public class Renderer {
         TextureCache.clear();
     }
 
+    private CameraController currentCamera;
     private Shader shader;
 }

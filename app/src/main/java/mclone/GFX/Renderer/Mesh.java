@@ -24,18 +24,23 @@ public class Mesh {
 
             ArrayList<VertexBufferLayout.VertexAttribute> vertexAttributes = new ArrayList<>();
             vertexAttributes.add(new VertexBufferLayout.VertexAttribute(ShaderPrimitiveUtil.ShaderPrimitiveType.FLOAT32, 3));
+            vertexAttributes.add(new VertexBufferLayout.VertexAttribute(ShaderPrimitiveUtil.ShaderPrimitiveType.FLOAT32, 3));
             vertexAttributes.add(new VertexBufferLayout.VertexAttribute(ShaderPrimitiveUtil.ShaderPrimitiveType.FLOAT32, 2));
             VertexBufferLayout layout = new VertexBufferLayout(vertexAttributes);
 
             Logger.trace("numVertices: " + numVertices);
-            FloatBuffer vertexBufferData = MemoryUtil.memAllocFloat(5 * numVertices);
+            FloatBuffer vertexBufferData = MemoryUtil.memAllocFloat(8 * numVertices);
             int index = 0;
             for (int i = 0; i < numVertices; i++) {
                 AIVector3D vertex = mesh.mVertices().get(i);
+                AIVector3D normal = mesh.mNormals().get(i);
                 AIVector3D textureCoords = mesh.mTextureCoords(0).get(i);
                 vertexBufferData.put(index++, vertex.x());
                 vertexBufferData.put(index++, vertex.y());
                 vertexBufferData.put(index++, vertex.z());
+                vertexBufferData.put(index++, normal.x());
+                vertexBufferData.put(index++, normal.y());
+                vertexBufferData.put(index++, normal.z());
                 vertexBufferData.put(index++, textureCoords.x());
                 vertexBufferData.put(index++, 1 - textureCoords.y());
             }

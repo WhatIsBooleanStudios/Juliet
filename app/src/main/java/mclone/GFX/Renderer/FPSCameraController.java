@@ -5,6 +5,7 @@ import mclone.GFX.OpenGL.UniformBuffer;
 import mclone.Platform.Window;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
+import org.joml.Vector3fc;
 import org.lwjgl.system.MemoryStack;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -63,6 +64,11 @@ public class FPSCameraController extends CameraController {
     @Override
     protected void bindToBindingPoint(int binding) {
         ubo.setToBindingPoint(binding);
+    }
+
+    @Override
+    protected Vector3fc getCameraPosition() {
+        return camera.getPosition();
     }
 
     UniformBuffer ubo = new UniformBuffer(null, 64, HardwareBuffer.UsageHints.USAGE_DYNAMIC);

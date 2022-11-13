@@ -3,6 +3,7 @@ package mclone.GFX.Renderer;
 import mclone.Logging.Logger;
 import org.joml.Vector3f;
 import org.joml.Matrix4f;
+import org.joml.Vector3fc;
 
 public class Camera {
     /**
@@ -34,6 +35,13 @@ public class Camera {
                                              (float)Math.sin(this.pitch),
                                           (float)Math.sin(this.yaw - (float)(Math.PI / 2.0f)) * (float)Math.cos(this.pitch));
         return direction;
+    }
+
+    /**
+     * @return The position of the camera
+     */
+    public Vector3fc getPosition() {
+        return cameraPosition;
     }
 
     /**

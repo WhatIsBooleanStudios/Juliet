@@ -55,8 +55,8 @@ public class App {
     private void loop() {
         try(MemoryStack stack = MemoryStack.stackPush()) {
 
-            Model model = new Model("models/gizmo.gltf");
-            Model tableModel = new Model("models/basicTable.gltf");
+            Model model = new Model("models/rustSphere.glb");
+            //Model tableModel = new Model("models/basicTable.gltf");
             FPSCameraController fpsCameraController = new FPSCameraController(window, new Vector3f(0.0f, 0.0f, -1.0f), 0.0f, (float)Math.PI);
 
             Vector2f screenCenter = new Vector2f(window.getWidth() / 2.0f, window.getHeight() / 2.0f);
@@ -79,6 +79,8 @@ public class App {
 
                     renderer.begin(fpsCameraController);
                     renderer.drawModel(model, new Vector3f(0.1f, 0.0f, 0.0f));
+                    Vector3f vector = new Vector3f(0.5f, 0.0f, -2.0f);
+                    renderer.drawModel(model, vector);
                     renderer.end();
 
                     window.swapBuffers();

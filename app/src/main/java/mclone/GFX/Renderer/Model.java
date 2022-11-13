@@ -76,33 +76,86 @@ public class Model {
         AIString name = AIString.calloc();
         Assimp.aiGetMaterialString(material, AI_MATKEY_NAME, 0, 0, name);
 
-        AIString diffuseTexturePath = AIString.calloc();
-        Assimp.aiGetMaterialTexture(material, aiTextureType_DIFFUSE, 0, diffuseTexturePath, (IntBuffer) null, null, null, null, null, null);
+        Texture diffuseTexture = retrieveMaterialTexture(material, aiTextureType_DIFFUSE);
+        if(diffuseTexture == null) {
+            Logger.error("Model.processMaterial", this, "Failed to load diffuse texture!");
+            return;
+        }
 
-        AIColor4D color4D = AIColor4D.calloc();
-        Assimp.aiGetMaterialColor(material, AI_MATKEY_COLOR_DIFFUSE, 0, 0, color4D);
-        Logger.trace("Color: " + color4D.r() + " " + color4D.g() + " " + color4D.b());
+        Texture normalTexture = retrieveMaterialTexture(material, aiTextureType_NORMALS);
+        if(normalTexture == null) {
+            Logger.error("Model.processMaterial", this, "Failed to load normal texture!");
+            return;
+        }
 
-        Logger.trace("Material name: " + name.dataString());
-        Logger.trace("Material path: " + diffuseTexturePath.dataString());
+        Texture metallicTexture = retrieveMaterialTexture(material, aiTextureType_UNKNOWN);
+        if(metallicTexture == null) {
+            Logger.error("Model.processMaterial", this, "Failed to load metalness texture!");
+            return;
+        }
 
-        if (diffuseTexturePath.length() > 1 && diffuseTexturePath.dataString().charAt(0) == '*') {
+        Texture roughnessTexture = retrieveMaterialTexture(material, aiTextureType_UNKNOWN);
+        if(roughnessTexture == null) {
+            Logger.error("Model.processMaterial", this, "Failed to load roughness texture!");
+            return;
+        }
+
+        materials.add(new Material(name.dataString(), diffuseTexture, normalTexture, metallicTexture, roughnessTexture));
+//        {
+//            AIString diffuseTexturePath = AIString.calloc();
+//            Assimp.aiGetMaterialTexture(material, aiTextureType_DIFFUSE, 0, diffuseTexturePath, (IntBuffer) null, null, null, null, null, null);
+//
+//            if (diffuseTexturePath.length() <= 0) {
+//                Logger.error("Material has no diffuse texture!");
+//                return;
+//            }
+//
+//            if (diffuseTexturePath.length() > 1 && diffuseTexturePath.dataString().charAt(0) == '*') {
+//                try {
+//                    int textureIndex = Integer.parseInt(diffuseTexturePath.dataString().substring(1), 10);
+//                    if (textureIndex >= this.textures.size()) {
+//                        Logger.error("Model.processMaterial", this, "Loaded material references nonexistent internal texture!");
+//                        return;
+//                    }
+//                    diffuseTexture = textures.get(textureIndex);
+//                } catch (NumberFormatException ignored) {
+//                }
+//            } else {
+//                diffuseTexture = TextureCache.load(diffuseTexturePath.dataString());
+//            }
+//            diffuseTexturePath.free();
+//        }
+
+        name.free();
+    }
+
+    private Texture retrieveMaterialTexture(AIMaterial material, int textureType) {
+        AIString texturePath = AIString.calloc();
+        aiGetMaterialTexture(material, textureType, 0, texturePath, (IntBuffer) null, null, null, null, null, null);
+
+        Texture texture = null;
+
+        if (texturePath.length() <= 0) {
+            Logger.error("texturePath.length() <= 0");
+            return null;
+        }
+
+        if (texturePath.length() > 1 && texturePath.dataString().charAt(0) == '*') {
             try {
-                int textureIndex = Integer.parseInt(diffuseTexturePath.dataString().substring(1), 10);
+                int textureIndex = Integer.parseInt( texturePath.dataString().substring(1), 10);
                 if (textureIndex >= this.textures.size()) {
                     Logger.error("Model.processMaterial", this, "Loaded material references nonexistent internal texture!");
-                    return;
+                    return null;
                 }
-                materials.add(new Material(name.dataString(), textures.get(textureIndex)));
+                texture = textures.get(textureIndex);
             } catch (NumberFormatException ignored) {
             }
         } else {
-            materials.add(new Material(diffuseTexturePath.dataString(), TextureCache.load(Paths.get(path).getParent() + "/" + diffuseTexturePath.dataString())));
+            texture = TextureCache.load(Paths.get(path).getParent() + "/" + texturePath.dataString());
         }
+        texturePath.free();
 
-        color4D.free();
-        name.free();
-        diffuseTexturePath.free();
+        return texture;
     }
 
     protected final Mesh[] getMeshes() {
