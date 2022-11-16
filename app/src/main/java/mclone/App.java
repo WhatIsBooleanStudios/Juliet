@@ -1,10 +1,7 @@
 package mclone;
 
-import mclone.GFX.Renderer.Camera;
-import mclone.GFX.Renderer.FPSCameraController;
-import mclone.GFX.Renderer.Model;
+import mclone.GFX.Renderer.*;
 import mclone.GFX.OpenGL.*;
-import mclone.GFX.Renderer.Renderer;
 import mclone.Platform.Window;
 
 import org.joml.Matrix4f;
@@ -69,6 +66,11 @@ public class App {
 
             // Run the rendering loop until the user has attempted to close
             // the window or has pressed the ESCAPE key.
+            PointLight pointLight0 = new PointLight(new Vector3f(0.0f, -0.5f, -1.0f), new Vector3f(1.0f, 1.0f, 1.0f), 1.0f);
+            PointLight pointLight1 = new PointLight(new Vector3f(0.5f, 0.0f, -1.0f), new Vector3f(1.0f, 1.0f, 1.0f), 1.0f);
+            PointLight pointLight2 = new PointLight(new Vector3f(-0.5f, 0.0f, -1.0f), new Vector3f(1.0f, 1.0f, 1.0f), 1.0f);
+            PointLight pointLight3 = new PointLight(new Vector3f(0.0f, 0.5f, -1.0f), new Vector3f(1.0f, 1.0f, 1.0f), 1.0f);
+
             while (!window.shouldClose() && !window.keyPressed(GLFW_KEY_ESCAPE)) {
                 try(MemoryStack loopStack = MemoryStack.stackPush()) {
                     GraphicsAPI.setClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -80,16 +82,21 @@ public class App {
                     fpsCameraController.update(window);
 
                     renderer.begin(fpsCameraController);
+
+                    renderer.beginLightConfiguration();
+                    renderer.attachPointLight(pointLight0);
+                    renderer.attachPointLight(pointLight1);
+                    renderer.attachPointLight(pointLight2);
+                    renderer.attachPointLight(pointLight3);
+                    renderer.endLightConfiguration();
+
+                    renderer.beginModelRendering();
                     renderer.drawModel(model, new Vector3f(0.0f, 0.0f, 1.0f));
                     Vector3f lightPos0 = new Vector3f(0.0f, 0.0f,  -1.6f);
-//                    Vector3f lightPos1 = new Vector3f(0.25f, 0.0f, 0.5f);
-//                    Vector3f lightPos2 = new Vector3f(0.5f, 0.0f, -2.0f);
-//                    Vector3f lightPos3 = new Vector3f(0.5f, 0.0f, -2.0f);
                     renderer.drawModel(smallerModel, lightPos0);
                     renderer.drawModel(metalCube, new Vector3f(0.0f));
-//                    renderer.drawModel(smallerModel, lightPos1);
-//                    renderer.drawModel(smallerModel, lightPos2);
-//                    renderer.drawModel(smallerModel, lightPos3);
+                    renderer.endModelRendering();
+
                     renderer.end();
 
                     window.swapBuffers();

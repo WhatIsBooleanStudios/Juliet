@@ -1,4 +1,4 @@
-#version 330 core
+#version 410 core
 out vec4 fragColor;
 in vec2 texCoords;
 in vec3 worldPos;
@@ -11,13 +11,26 @@ uniform float metallic;
 uniform float roughness;
 
 // lights
-uniform vec3 lightPositions[4];
+/*uniform vec3 lightPositions[4];
 uniform vec3 lightColors[4] = vec3[4](
     vec3(1.0f, 1.0f, 1.0f),
     vec3(1.0f, 1.0f, 1.0f),
     vec3(1.0f, 1.0f, 1.0f),
     vec3(1.0f, 1.0f, 1.0f)
-);
+);*/
+
+#define MAX_POINT_LIGHTS 128
+
+struct PointLight {
+    vec3 position;
+    vec3 color;
+    vec2 padding;
+};
+
+layout(std140) uniform PointLights {
+    PointLight pointLights[MAX_POINT_LIGHTS];
+};
+uniform int numPointLights;
 
 uniform vec3 camPos;
 
@@ -80,14 +93,14 @@ void main()
 
     // reflectance equation
     vec3 Lo = vec3(0.0);
-    for(int i = 0; i < 4; ++i)
+    for(int i = 0; i < numPointLights; ++i)
     {
         // calculate per-light radiance
-        vec3 L = normalize(lightPositions[i] - worldPos);
+        vec3 L = normalize(pointLights[i].position - worldPos);
         vec3 H = normalize(V + L);
-        float distance = length(lightPositions[i] - worldPos);
+        float distance = length(pointLights[i].position - worldPos);
         float attenuation = 1.0 / (distance * distance);
-        vec3 radiance = lightColors[i] * attenuation;
+        vec3 radiance = pointLights[i].color * attenuation;
 
         // Cook-Torrance BRDF
         float NDF = DistributionGGX(N, H, roughness);
