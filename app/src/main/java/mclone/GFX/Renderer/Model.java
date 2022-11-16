@@ -105,7 +105,9 @@ public class Model {
             roughness[0] = 1.0f;
         }
 
-        materials.add(new Material(name.dataString(), diffuseTexture, diffuseColor, metallic[0], roughness[0]));
+        Material mcloneMaterial = new Material(name.dataString(), diffuseTexture, diffuseColor, metallic[0], roughness[0]);
+        MaterialCache.loadMaterial(mcloneMaterial);
+        materials.add(mcloneMaterial);
 
         name.free();
     }

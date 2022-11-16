@@ -9,7 +9,6 @@ uniform sampler2D diffuseTexture;
 uniform vec3 diffuseColor;
 uniform float metallic;
 uniform float roughness;
-uniform float ao;
 
 // lights
 uniform vec3 lightPositions[4];
@@ -119,7 +118,7 @@ void main()
 
     // ambient lighting (note that the next IBL tutorial will replace 
     // this ambient lighting with environment lighting).
-    vec3 ambient = vec3(0.03) * diffuse * ao;
+    vec3 ambient = vec3(0.03) * diffuse;
 
     vec3 color = ambient + Lo;
 

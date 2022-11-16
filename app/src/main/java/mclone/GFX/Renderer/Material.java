@@ -38,6 +38,30 @@ public class Material {
         return diffuseColor;
     }
 
+    @Override
+    public int hashCode() {
+        return (diffuseTexture == null ? "" : diffuseTexture.getName() + diffuseColor + metallic + roughness).hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj.getClass() != this.getClass()) {
+            return false;
+        }
+
+        return this.hashCode() == obj.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "Material(name=\"" + getName() +
+            "\", diffuseTexture=" + diffuseTexture +
+            ", diffuseColor=" + diffuseColor +
+            ", metallic=" + metallic +
+            ", roughness=" + roughness +
+            ")";
+    }
+
     private final String name;
     private Texture diffuseTexture = null;
     private Vector3f diffuseColor;

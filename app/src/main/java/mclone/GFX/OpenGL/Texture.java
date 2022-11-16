@@ -60,6 +60,11 @@ public class Texture {
     public boolean loaded() { return id >= 0; }
 
     /**
+     * @return The name of the texture
+     */
+    public final String getName() { return name; }
+
+    /**
      * Bind the texture
      */
     private void bind() {
