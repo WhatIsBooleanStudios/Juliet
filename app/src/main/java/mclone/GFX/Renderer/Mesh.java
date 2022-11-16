@@ -76,7 +76,7 @@ public class Mesh {
     }
 
     public void tempDraw(Shader shader) {
-        material.getDiffuse().bind(0);
+        material.getDiffuseTexture().bind(0);
         GraphicsAPI.drawIndexed(shader, vbo, ibo, indexCount);
     }
 

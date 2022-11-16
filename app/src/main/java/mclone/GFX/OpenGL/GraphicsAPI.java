@@ -25,6 +25,7 @@ public class GraphicsAPI {
         GL.createCapabilities();
         debugCb = GLUtil.setupDebugMessageCallback(System.out);
         setGLDebugMessageControl(GLDebugMessageSeverity.NOTIFICATION, false);
+        glEnable(GL_MULTISAMPLE);
     }
 
     /**

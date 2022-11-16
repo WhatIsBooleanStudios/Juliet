@@ -1,35 +1,18 @@
-/*#version 330 core
-
-out vec4 fragColor;
-
-in vec2 texCoords;
-
-uniform sampler2D diffuseTexture;
-
-void main() {
-   fragColor = texture(diffuseTexture, texCoords);
-}*/
 #version 330 core
-
 out vec4 fragColor;
 in vec2 texCoords;
 in vec3 worldPos;
 in vec3 normal;
 
 // material parameters
-uniform sampler2D albedoMap;
-uniform sampler2D normalMap;
-uniform sampler2D metallicMap;
-uniform sampler2D roughnessMap;
+uniform sampler2D diffuseTexture;
+uniform vec3 diffuseColor;
+uniform float metallic;
+uniform float roughness;
+uniform float ao;
 
 // lights
-uniform vec3 lightPositions[4] = vec3[4](
-    vec3(0.5f, 0.0f, -2.0f),
-    vec3(0.25f, 0.0f, 1.0f),
-    vec3(0.5f, 0.0f, -2.0f),
-    vec3(0.25f, 0.0f,  1.0f)
-);
-
+uniform vec3 lightPositions[4];
 uniform vec3 lightColors[4] = vec3[4](
     vec3(1.0f, 1.0f, 1.0f),
     vec3(1.0f, 1.0f, 1.0f),
@@ -40,27 +23,6 @@ uniform vec3 lightColors[4] = vec3[4](
 uniform vec3 camPos;
 
 const float PI = 3.14159265359;
-// ----------------------------------------------------------------------------
-// Easy trick to get tangent-normals to world-space to keep PBR code simplified.
-// Don't worry if you don't get what's going on; you generally want to do normal
-// mapping the usual way for performance anways; I do plan make a note of this
-// technique somewhere later in the normal mapping tutorial.
-vec3 getNormalFromMap()
-{
-    vec3 tangentNormal = texture(normalMap, texCoords).xyz * 2.0 - 1.0;
-
-    vec3 Q1  = dFdx(worldPos);
-    vec3 Q2  = dFdy(worldPos);
-    vec2 st1 = dFdx(texCoords);
-    vec2 st2 = dFdy(texCoords);
-
-    vec3 N   = normalize(normal);
-    vec3 T  = normalize(Q1*st2.t - Q2*st1.t);
-    vec3 B  = -normalize(cross(N, T));
-    mat3 TBN = mat3(T, B, N);
-
-    return normalize(TBN * tangentNormal);
-}
 // ----------------------------------------------------------------------------
 float DistributionGGX(vec3 N, vec3 H, float roughness)
 {
@@ -104,17 +66,18 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0)
 // ----------------------------------------------------------------------------
 void main()
 {
-    vec3 albedo     = pow(texture(albedoMap, texCoords).rgb, vec3(2.2));
-    float metallic  = texture(metallicMap, texCoords).r;
-    float roughness = texture(roughnessMap, texCoords).r;
-
-    vec3 N = getNormalFromMap();
+    vec3 N = normalize(normal);
     vec3 V = normalize(camPos - worldPos);
 
-    // calculate reflectance at normal incidence; if dia-electric (like plastic) use F0
-    // of 0.04 and if it's a metal, use the albedo color as F0 (metallic workflow)
+    // check if diffuse color is negative which means that there is a diffuse texture to sample from
+    vec3 diffuse = diffuseColor;
+    if(diffuse.r < 0) {
+        diffuse = texture(diffuseTexture, texCoords).rgb;
+    }
+    // calculate reflectance at normal incidence; if dia-electric (like plastic) use F0 
+    // of 0.04 and if it's a metal, use the diffuse color as F0 (metallic workflow)    
     vec3 F0 = vec3(0.04);
-    F0 = mix(F0, albedo, metallic);
+    F0 = mix(F0, diffuse, metallic);
 
     // reflectance equation
     vec3 Lo = vec3(0.0);
@@ -130,7 +93,7 @@ void main()
         // Cook-Torrance BRDF
         float NDF = DistributionGGX(N, H, roughness);
         float G   = GeometrySmith(N, V, L, roughness);
-        vec3 F    = fresnelSchlick(max(dot(H, V), 0.0), F0);
+        vec3 F    = fresnelSchlick(clamp(dot(H, V), 0.0, 1.0), F0);
 
         vec3 numerator    = NDF * G * F;
         float denominator = 4.0 * max(dot(N, V), 0.0) * max(dot(N, L), 0.0) + 0.0001; // + 0.0001 to prevent divide by zero
@@ -142,7 +105,7 @@ void main()
         // be above 1.0 (unless the surface emits light); to preserve this
         // relationship the diffuse component (kD) should equal 1.0 - kS.
         vec3 kD = vec3(1.0) - kS;
-        // multiply kD by the inverse metalness such that only non-metals
+        // multiply kD by the inverse metalness such that only non-metals 
         // have diffuse lighting, or a linear blend if partly metal (pure metals
         // have no diffuse light).
         kD *= 1.0 - metallic;
@@ -151,12 +114,12 @@ void main()
         float NdotL = max(dot(N, L), 0.0);
 
         // add to outgoing radiance Lo
-        Lo += (kD * albedo / PI + specular) * radiance * NdotL;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
+        Lo += (kD * diffuse / PI + specular) * radiance * NdotL;  // note that we already multiplied the BRDF by the Fresnel (kS) so we won't multiply by kS again
     }
 
-    // ambient lighting (note that the next IBL tutorial will replace
+    // ambient lighting (note that the next IBL tutorial will replace 
     // this ambient lighting with environment lighting).
-    vec3 ambient = vec3(0.03) * albedo;
+    vec3 ambient = vec3(0.03) * diffuse * ao;
 
     vec3 color = ambient + Lo;
 
@@ -166,6 +129,4 @@ void main()
     color = pow(color, vec3(1.0/2.2));
 
     fragColor = vec4(color, 1.0);
-    //fragColor = vec4(Lo, 1.0f);
-    //fragColor = vec4(metallic, metallic, metallic, 1.0f);
 }

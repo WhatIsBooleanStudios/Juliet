@@ -55,7 +55,9 @@ public class App {
     private void loop() {
         try(MemoryStack stack = MemoryStack.stackPush()) {
 
-            Model model = new Model("models/rustSphere.glb");
+            Model model = new Model("models/salmonCube.glb");
+            Model smallerModel = new Model("models/roughWaveBall.glb");
+            Model metalCube = new Model("models/metalCube.glb");
             //Model tableModel = new Model("models/basicTable.gltf");
             FPSCameraController fpsCameraController = new FPSCameraController(window, new Vector3f(0.0f, 0.0f, -1.0f), 0.0f, (float)Math.PI);
 
@@ -69,7 +71,7 @@ public class App {
             // the window or has pressed the ESCAPE key.
             while (!window.shouldClose() && !window.keyPressed(GLFW_KEY_ESCAPE)) {
                 try(MemoryStack loopStack = MemoryStack.stackPush()) {
-                    GraphicsAPI.setClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+                    GraphicsAPI.setClearColor(0.0f, 0.0f, 0.0f, 1.0f);
                     GraphicsAPI.clear();
 
                     window.setTitle("Window! Cursor pos: " + window.getMousePosition().get(0) + " "
@@ -78,9 +80,16 @@ public class App {
                     fpsCameraController.update(window);
 
                     renderer.begin(fpsCameraController);
-                    renderer.drawModel(model, new Vector3f(0.1f, 0.0f, 0.0f));
-                    Vector3f vector = new Vector3f(0.5f, 0.0f, -2.0f);
-                    renderer.drawModel(model, vector);
+                    renderer.drawModel(model, new Vector3f(0.0f, 0.0f, 1.0f));
+                    Vector3f lightPos0 = new Vector3f(0.0f, 0.0f,  -1.6f);
+//                    Vector3f lightPos1 = new Vector3f(0.25f, 0.0f, 0.5f);
+//                    Vector3f lightPos2 = new Vector3f(0.5f, 0.0f, -2.0f);
+//                    Vector3f lightPos3 = new Vector3f(0.5f, 0.0f, -2.0f);
+                    renderer.drawModel(smallerModel, lightPos0);
+                    renderer.drawModel(metalCube, new Vector3f(0.0f));
+//                    renderer.drawModel(smallerModel, lightPos1);
+//                    renderer.drawModel(smallerModel, lightPos2);
+//                    renderer.drawModel(smallerModel, lightPos3);
                     renderer.end();
 
                     window.swapBuffers();

@@ -17,6 +17,6 @@ out vec3 normal;
 void main() {
     gl_Position = camera.transform * vec4(vertPos + uTranslation, 1.0);
     texCoords = vertTexCoords;
-    normal = uTranslation;
+    normal = vertNormal;
     worldPos = vertPos + uTranslation;
 }
