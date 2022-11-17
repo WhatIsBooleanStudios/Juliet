@@ -67,8 +67,12 @@ public class FPSCameraController extends CameraController {
     }
 
     @Override
-    protected Vector3fc getCameraPosition() {
+    public Vector3fc getCameraPosition() {
         return camera.getPosition();
+    }
+
+    public Vector3fc getCameraDirection() {
+        return camera.getDirection();
     }
 
     public void dispose() {

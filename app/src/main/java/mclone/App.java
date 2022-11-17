@@ -61,10 +61,7 @@ public class App {
             PointLight pointLight2 = new PointLight(new Vector3f(-0.5f, 0.0f, -1.0f), new Vector3f(1.0f, 1.0f, 1.0f), 1.0f);
             PointLight pointLight3 = new PointLight(new Vector3f(0.0f, 0.5f, -1.0f), new Vector3f(1.0f, 1.0f, 1.0f), 1.0f);
 
-            renderer.getLightManager().addPointLight(pointLight0);
-            renderer.getLightManager().addPointLight(pointLight1);
-            renderer.getLightManager().addPointLight(pointLight2);
-            renderer.getLightManager().addPointLight(pointLight3);
+            SpotLight spotLight = new SpotLight(new Vector3f(0.0f, 0.0f, 0.0f), new Vector3f(0.0f, 0.0f, 0.0f), new Vector3f(1.0f, 1.0f, 1.0f), 1.0f, (float)Math.cos(Math.PI / 12.0));
 
             while (!window.shouldClose() && !window.keyPressed(GLFW_KEY_ESCAPE)) {
                 try(MemoryStack loopStack = MemoryStack.stackPush()) {
@@ -76,7 +73,16 @@ public class App {
 
                     fpsCameraController.update(window);
 
+                    renderer.getLightManager().addPointLight(pointLight0);
+                    renderer.getLightManager().addPointLight(pointLight1);
+                    renderer.getLightManager().addPointLight(pointLight2);
+                    renderer.getLightManager().addPointLight(pointLight3);
+                    spotLight.setPosition(fpsCameraController.getCameraPosition());
+                    spotLight.setDirection(fpsCameraController.getCameraDirection());
+                    renderer.getLightManager().addSpotLight(spotLight);
+
                     renderer.begin(fpsCameraController);
+
 
                     renderer.beginModelRendering();
                     renderer.drawModel(model, new Vector3f(0.0f, 0.0f, 1.0f));
@@ -86,6 +92,8 @@ public class App {
                     renderer.endModelRendering();
 
                     renderer.end();
+
+                    renderer.getLightManager().clearLights();
 
                     window.swapBuffers();
 

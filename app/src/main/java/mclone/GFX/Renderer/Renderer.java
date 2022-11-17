@@ -17,12 +17,14 @@ public class Renderer {
         );
         shaderBuilder.addUniformBuffer("Camera");
         shaderBuilder.addUniformBuffer("PointLights");
+        shaderBuilder.addUniformBuffer("SpotLights");
         shaderBuilder.addUniform("uTranslation", ShaderPrimitiveUtil.ShaderPrimitiveType.VEC3);
         shaderBuilder.addUniform("camPos", ShaderPrimitiveUtil.ShaderPrimitiveType.VEC3);
         shaderBuilder.addUniform("diffuseColor", ShaderPrimitiveUtil.ShaderPrimitiveType.VEC3);
         shaderBuilder.addUniform("metallic", ShaderPrimitiveUtil.ShaderPrimitiveType.FLOAT32);
         shaderBuilder.addUniform("roughness", ShaderPrimitiveUtil.ShaderPrimitiveType.FLOAT32);
         shaderBuilder.addUniform("numPointLights", ShaderPrimitiveUtil.ShaderPrimitiveType.INT32);
+        shaderBuilder.addUniform("numSpotLights", ShaderPrimitiveUtil.ShaderPrimitiveType.INT32);
         this.shader = shaderBuilder.createShader("StaticMeshShader");
     }
 
@@ -33,12 +35,15 @@ public class Renderer {
 
         lightManager.updateLights();
         lightManager.pointLightUBO.setToBindingPoint(1);
+        lightManager.spotLightUBO.setToBindingPoint(2);
     }
 
     public void beginModelRendering() {
         shader.setUniformBuffer("Camera", 0);
         shader.setUniformBuffer("PointLights", 1);
+        shader.setUniformBuffer("SpotLights", 2);
         shader.setUniformInt("numPointLights", lightManager.getNumPointLights());
+        shader.setUniformInt("numSpotLights", lightManager.getNumSpotLights());
     }
 
     public void drawModel(@NotNull Model model, @NotNull Vector3fc position) {
