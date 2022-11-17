@@ -13,7 +13,7 @@ public class MaterialCache {
             if(!material.getName().equals(materialMap.get(material).getName())) {
                 Logger.warn(
                     "MaterialCache.loadMaterial",
-                    "Material \"" + material.getName() + "\" is identical to the material with name \"" + materialMap.get(material).getName()
+                    "Material \"" + material.getName() + "\" is identical to the material with name \"" + materialMap.get(material).getName() + "\""
                 );
             }
             material = materialMap.get(material);

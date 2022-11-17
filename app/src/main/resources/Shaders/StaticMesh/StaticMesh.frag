@@ -10,21 +10,13 @@ uniform vec3 diffuseColor;
 uniform float metallic;
 uniform float roughness;
 
-// lights
-/*uniform vec3 lightPositions[4];
-uniform vec3 lightColors[4] = vec3[4](
-    vec3(1.0f, 1.0f, 1.0f),
-    vec3(1.0f, 1.0f, 1.0f),
-    vec3(1.0f, 1.0f, 1.0f),
-    vec3(1.0f, 1.0f, 1.0f)
-);*/
-
 #define MAX_POINT_LIGHTS 128
 
 struct PointLight {
     vec3 position;
+    float padding0;
     vec3 color;
-    vec2 padding;
+    float padding1;
 };
 
 layout(std140) uniform PointLights {

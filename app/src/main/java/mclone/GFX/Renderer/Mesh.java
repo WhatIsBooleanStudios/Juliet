@@ -16,7 +16,6 @@ import java.util.ArrayList;
 public class Mesh {
     public Mesh(AIMesh mesh, Material material) {
         try (MemoryStack stack = MemoryStack.stackPush()) {
-            Logger.trace("begin mesh");
             int numVertices = mesh.mNumVertices();
             vertexCount = numVertices;
 
@@ -28,7 +27,6 @@ public class Mesh {
             vertexAttributes.add(new VertexBufferLayout.VertexAttribute(ShaderPrimitiveUtil.ShaderPrimitiveType.FLOAT32, 2));
             VertexBufferLayout layout = new VertexBufferLayout(vertexAttributes);
 
-            Logger.trace("numVertices: " + numVertices);
             FloatBuffer vertexBufferData = MemoryUtil.memAllocFloat(8 * numVertices);
             int index = 0;
             for (int i = 0; i < numVertices; i++) {
@@ -71,7 +69,6 @@ public class Mesh {
 
             MemoryUtil.memFree(vertexBufferData);
             MemoryUtil.memFree(indexBufferData);
-            Logger.trace("end mesh");
         }
     }
 

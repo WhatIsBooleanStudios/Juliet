@@ -1,6 +1,7 @@
 package mclone.GFX.Renderer;
 
 import mclone.GFX.OpenGL.Texture;
+import mclone.Logging.Logger;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
 
@@ -40,7 +41,7 @@ public class Material {
 
     @Override
     public int hashCode() {
-        return (diffuseTexture == null ? "" : diffuseTexture.getName() + diffuseColor + metallic + roughness).hashCode();
+        return ((diffuseTexture == null ? "" : diffuseTexture.getName()) + diffuseColor + "" + metallic + "" + roughness).hashCode();
     }
 
     @Override

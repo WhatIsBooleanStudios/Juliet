@@ -17,10 +17,10 @@ public class PointLight {
         dataBuffer[0] = position.x();
         dataBuffer[1] = position.y();
         dataBuffer[2] = position.z();
-        dataBuffer[3] = color.x() * intensity;
-        dataBuffer[4] = color.y() * intensity;
-        dataBuffer[5] = color.z() * intensity;
-        dataBuffer[6] = 0.0f;
+        dataBuffer[3] = 0.0f;
+        dataBuffer[4] = color.x() * intensity;
+        dataBuffer[5] = color.y() * intensity;
+        dataBuffer[6] = color.z() * intensity;
         dataBuffer[7] = 0.0f;
     }
 
@@ -63,8 +63,9 @@ public class PointLight {
     /**
      * struct PointLight {
      *     float x, y , z;
+     *     float padding0;
      *     float r * intensity, g * intensity, b * intensity;
-     *     float[2] padding;
+     *     float padding1;
      * }
      */
     final float[] dataBuffer = new float[dataBufferNumFloats()];

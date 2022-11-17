@@ -32,12 +32,10 @@ public class Model {
             }
 
             AIString sceneName = scene.mName();
-            Logger.trace("Scene name: " + sceneName.dataString());
 
             createInternalTextures(scene, sceneName);
 
             int numMaterials = scene.mNumMaterials();
-            Logger.trace("num materials: " + numMaterials);
             PointerBuffer aiMaterials = scene.mMaterials();
             for (int i = 0; i < numMaterials; i++) {
                 AIMaterial material = AIMaterial.create(aiMaterials.get());
@@ -45,7 +43,6 @@ public class Model {
             }
 
             meshes = new Mesh[scene.mNumMeshes()];
-            Logger.trace("numMeshes: "  + scene.mNumMeshes());
             for (int i = 0; i < scene.mNumMeshes(); i++) {
                 AIMesh mesh = AIMesh.create(scene.mMeshes().get(i));
                 Material material = materials.get(mesh.mMaterialIndex());
@@ -57,7 +54,6 @@ public class Model {
 
     private void createInternalTextures(AIScene scene, AIString sceneName) {
         int numInternalTextures = scene.mNumTextures();
-        Logger.trace("numInternalTextures: " + numInternalTextures);
         if (numInternalTextures > 0) {
             for (int i = 0; i < numInternalTextures; i++) {
                 AITexture aiTexture = AITexture.create(scene.mTextures().get(i));
@@ -83,7 +79,6 @@ public class Model {
         Vector3f diffuseColor = new Vector3f();
         try(AIColor4D color = AIColor4D.calloc()) {
             Assimp.aiGetMaterialColor(material, AI_MATKEY_COLOR_DIFFUSE, 0, 0, color);
-            Logger.trace("Color: " + color.r() + " " + color.g() + " " + color.b());
             diffuseColor.setComponent(0, color.r());
             diffuseColor.setComponent(1, color.g());
             diffuseColor.setComponent(2, color.b());

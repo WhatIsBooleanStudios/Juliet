@@ -27,7 +27,7 @@ public class Renderer {
         shaderBuilder.addUniform("diffuseColor", ShaderPrimitiveUtil.ShaderPrimitiveType.VEC3);
         shaderBuilder.addUniform("metallic", ShaderPrimitiveUtil.ShaderPrimitiveType.FLOAT32);
         shaderBuilder.addUniform("roughness", ShaderPrimitiveUtil.ShaderPrimitiveType.FLOAT32);
-        shaderBuilder.addUniform("numPointLights", ShaderPrimitiveUtil.ShaderPrimitiveType.UINT32);
+        shaderBuilder.addUniform("numPointLights", ShaderPrimitiveUtil.ShaderPrimitiveType.INT32);
         this.shader = shaderBuilder.createShader("StaticMeshShader");
 
         pointLightUBO = new UniformBuffer(null, 4L * PointLight.dataBufferNumFloats() * MAX_POINT_LIGHTS, HardwareBuffer.UsageHints.USAGE_DYNAMIC);
@@ -77,7 +77,6 @@ public class Renderer {
     }
 
     public void attachPointLight(@NotNull PointLight light) {
-        // Logger.trace("DestPos: " + PointLight.dataBufferNumFloats() * currentPointLightIndex);
         System.arraycopy(light.dataBuffer, 0, pointLightsData, PointLight.dataBufferNumFloats() * currentPointLightIndex, PointLight.dataBufferNumFloats());
         currentPointLightIndex++;
     }

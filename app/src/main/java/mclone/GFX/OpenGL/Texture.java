@@ -115,9 +115,6 @@ public class Texture {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
         
         int imageType = GL_RGBA;
-        Logger.trace("MaxSize: " + glGetInteger(GL_MAX_TEXTURE_SIZE));
-        Logger.trace("Width: " + imageWidth[0]);
-        Logger.trace("Height: " + imageHeight[0]);
         glTexImage2D(GL_TEXTURE_2D, 0, imageType, imageWidth[0], imageHeight[0], 0, imageType, GL_UNSIGNED_BYTE, imageData);
         glGenerateMipmap(GL_TEXTURE_2D);
 
