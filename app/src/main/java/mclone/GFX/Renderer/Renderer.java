@@ -5,10 +5,6 @@ import mclone.Platform.Filesystem;
 import org.jetbrains.annotations.NotNull;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
-import org.lwjgl.system.MemoryStack;
-
-import java.awt.*;
-import java.nio.FloatBuffer;
 
 public class Renderer {
     public Renderer() {
@@ -28,8 +24,6 @@ public class Renderer {
         shaderBuilder.addUniform("roughness", ShaderPrimitiveUtil.ShaderPrimitiveType.FLOAT32);
         shaderBuilder.addUniform("numPointLights", ShaderPrimitiveUtil.ShaderPrimitiveType.INT32);
         this.shader = shaderBuilder.createShader("StaticMeshShader");
-
-        pointLightUBO = new UniformBuffer(null, 4L * PointLight.dataBufferNumFloats() * MAX_POINT_LIGHTS, HardwareBuffer.UsageHints.USAGE_DYNAMIC);
     }
 
     public void begin(@NotNull CameraController camera) {
@@ -37,13 +31,14 @@ public class Renderer {
         shader.bind();
         shader.setUniformVec3("camPos", camera.getCameraPosition());
 
-        pointLightUBO.setToBindingPoint(1);
+        lightManager.updateLights();
+        lightManager.pointLightUBO.setToBindingPoint(1);
     }
 
     public void beginModelRendering() {
         shader.setUniformBuffer("Camera", 0);
         shader.setUniformBuffer("PointLights", 1);
-        shader.setUniformInt("numPointLights", currentPointLightIndex);
+        shader.setUniformInt("numPointLights", lightManager.getNumPointLights());
     }
 
     public void drawModel(@NotNull Model model, @NotNull Vector3fc position) {
@@ -62,50 +57,26 @@ public class Renderer {
         }
     }
 
-    public void endModelRendering() {
+    public void endModelRendering() {}
 
-    }
-
-    public void beginLightConfiguration() {
-
-    }
-
-    public void attachPointLight(@NotNull PointLight light) {
-        System.arraycopy(light.dataBuffer, 0, pointLightsData, PointLight.dataBufferNumFloats() * currentPointLightIndex, PointLight.dataBufferNumFloats());
-        currentPointLightIndex++;
-    }
-
-    public void endLightConfiguration() {
-        try(MemoryStack stack = MemoryStack.stackPush()) {
-            FloatBuffer buffer = stack.mallocFloat((currentPointLightIndex) * PointLight.dataBufferNumFloats());
-            buffer.put(pointLightsData, 0, (currentPointLightIndex) * PointLight.dataBufferNumFloats());
-            buffer.flip();
-            pointLightUBO.setData(buffer, (long)(currentPointLightIndex) * PointLight.dataBufferNumFloats() * 4);
-        }
-    }
-
-    public void end() {
-        currentPointLightIndex = 0;
-    }
+    public void end() {}
 
     public void shutdown() {
         materialCache.clear();
         textureCache.clear();
-        pointLightUBO.dispose();
         materialCache.clear();
+        lightManager.dispose();
     }
 
     public TextureCache getTextureCache() { return textureCache; }
     public MaterialCache getMaterialCache() { return materialCache; }
     public ModelLoader getModelLoader() { return modelLoader; }
+    public LightManager getLightManager() { return lightManager; }
 
     private final Shader shader;
 
     ModelLoader modelLoader = new ModelLoader(this);
+    LightManager lightManager = new LightManager();
     TextureCache textureCache = new TextureCache();
     MaterialCache materialCache = new MaterialCache();
-    public static final int MAX_POINT_LIGHTS = 128;
-    private int currentPointLightIndex = 0;
-    private final float[] pointLightsData = new float[MAX_POINT_LIGHTS * PointLight.dataBufferNumFloats()];
-    private final UniformBuffer pointLightUBO;
 }

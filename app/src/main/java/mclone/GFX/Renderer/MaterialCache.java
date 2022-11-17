@@ -11,7 +11,7 @@ public class MaterialCache {
         if(materialMap.containsKey(material)) {
             if(!material.getName().equals(materialMap.get(material).getName())) {
                 Logger.warn(
-                    "MaterialCache.loadMaterial",
+                    "MaterialCache.loadMaterial", this,
                     "Material \"" + material.getName() + "\" is identical to the material with name \"" + materialMap.get(material).getName() + "\""
                 );
             }

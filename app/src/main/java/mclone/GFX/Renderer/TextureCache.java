@@ -12,7 +12,7 @@ public class TextureCache {
         if(cache.containsKey(path)) {
             Texture texture = cache.get(path);
             if(texture == null) {
-                Logger.error("TextureCache.load", "The name \"" + path + "\" exists in texture cache but the corresponding texture is null!");
+                Logger.error("TextureCache.load", this, "The name \"" + path + "\" exists in texture cache but the corresponding texture is null!");
             }
             return texture;
 

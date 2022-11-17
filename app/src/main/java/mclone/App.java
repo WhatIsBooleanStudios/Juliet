@@ -17,7 +17,6 @@ public class App {
     private Window window;
 
     public void run() {
-
         init();
         loop();
 
@@ -62,6 +61,11 @@ public class App {
             PointLight pointLight2 = new PointLight(new Vector3f(-0.5f, 0.0f, -1.0f), new Vector3f(1.0f, 1.0f, 1.0f), 1.0f);
             PointLight pointLight3 = new PointLight(new Vector3f(0.0f, 0.5f, -1.0f), new Vector3f(1.0f, 1.0f, 1.0f), 1.0f);
 
+            renderer.getLightManager().addPointLight(pointLight0);
+            renderer.getLightManager().addPointLight(pointLight1);
+            renderer.getLightManager().addPointLight(pointLight2);
+            renderer.getLightManager().addPointLight(pointLight3);
+
             while (!window.shouldClose() && !window.keyPressed(GLFW_KEY_ESCAPE)) {
                 try(MemoryStack loopStack = MemoryStack.stackPush()) {
                     GraphicsAPI.setClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -73,13 +77,6 @@ public class App {
                     fpsCameraController.update(window);
 
                     renderer.begin(fpsCameraController);
-
-                    renderer.beginLightConfiguration();
-                    renderer.attachPointLight(pointLight0);
-                    renderer.attachPointLight(pointLight1);
-                    renderer.attachPointLight(pointLight2);
-                    renderer.attachPointLight(pointLight3);
-                    renderer.endLightConfiguration();
 
                     renderer.beginModelRendering();
                     renderer.drawModel(model, new Vector3f(0.0f, 0.0f, 1.0f));
