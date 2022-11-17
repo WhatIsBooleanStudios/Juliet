@@ -71,6 +71,10 @@ public class FPSCameraController extends CameraController {
         return camera.getPosition();
     }
 
+    public void dispose() {
+        ubo.dispose();
+    }
+
     UniformBuffer ubo = new UniformBuffer(null, 64, HardwareBuffer.UsageHints.USAGE_DYNAMIC);
 
     private final Camera camera;

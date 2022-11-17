@@ -6,9 +6,9 @@ import mclone.Logging.Logger;
 import java.util.HashMap;
 
 public class TextureCache {
-    private TextureCache() {}
+    protected TextureCache() {}
 
-    public static Texture load(String path) {
+    public Texture load(String path) {
         if(cache.containsKey(path)) {
             Texture texture = cache.get(path);
             if(texture == null) {
@@ -28,11 +28,11 @@ public class TextureCache {
         }
     }
 
-    public static Texture get(String path) {
+    public Texture get(String path) {
         return cache.get(path);
     }
 
-    protected static void clear() {
+    protected void clear() {
         for(Texture texture : cache.values()) {
             if(texture != null && texture.loaded()) {
                 texture.dispose();
@@ -40,6 +40,5 @@ public class TextureCache {
         }
         cache.clear();
     }
-
     private static final HashMap<String, Texture> cache = new HashMap<>();
 }

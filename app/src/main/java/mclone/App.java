@@ -4,21 +4,13 @@ import mclone.GFX.Renderer.*;
 import mclone.GFX.OpenGL.*;
 import mclone.Platform.Window;
 
-import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
-import org.lwjgl.*;
 import org.lwjgl.system.MemoryStack;
 
 import mclone.Logging.Logger;
-import mclone.GFX.OpenGL.ShaderPrimitiveUtil.ShaderPrimitiveType;
-import mclone.GFX.OpenGL.VertexBufferLayout.VertexAttribute;
 
 import static org.lwjgl.glfw.GLFW.*;
-
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
-import java.util.ArrayList;
 
 public class App {
     // The window handle
@@ -52,10 +44,6 @@ public class App {
     private void loop() {
         try(MemoryStack stack = MemoryStack.stackPush()) {
 
-            Model model = new Model("models/salmonCube.glb");
-            Model smallerModel = new Model("models/roughWaveBall.glb");
-            Model metalCube = new Model("models/metalCube.glb");
-            //Model tableModel = new Model("models/basicTable.gltf");
             FPSCameraController fpsCameraController = new FPSCameraController(window, new Vector3f(0.0f, 0.0f, -1.0f), 0.0f, (float)Math.PI);
 
             Vector2f screenCenter = new Vector2f(window.getWidth() / 2.0f, window.getHeight() / 2.0f);
@@ -63,6 +51,9 @@ public class App {
             window.captureCursor(true);
 
             Renderer renderer = new Renderer();
+            Model model = renderer.getModelLoader().load("models/salmonCube.glb");
+            Model smallerModel = renderer.getModelLoader().load("models/roughWaveBall.glb");
+            Model metalCube = renderer.getModelLoader().load("models/metalCube.glb");
 
             // Run the rendering loop until the user has attempted to close
             // the window or has pressed the ESCAPE key.

@@ -8,17 +8,16 @@ import org.lwjgl.PointerBuffer;
 import org.lwjgl.assimp.*;
 import org.lwjgl.system.MemoryStack;
 
-import mclone.GFX.OpenGL.Shader;
 import mclone.Logging.Logger;
 
 import java.nio.IntBuffer;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Objects;
 
 public class Model {
-    public Model(String path) {
-        this.path = new String(path);
+    protected Model(String path, TextureCache textureCache, MaterialCache materialCache) {
+        this.path = path;
         try (MemoryStack stack = MemoryStack.stackPush()) {
             AIScene scene = aiImportFile(
                 path,
@@ -31,35 +30,59 @@ public class Model {
                 return;
             }
 
-            AIString sceneName = scene.mName();
-
-            createInternalTextures(scene, sceneName);
+            createInternalTextures(scene);
 
             int numMaterials = scene.mNumMaterials();
             PointerBuffer aiMaterials = scene.mMaterials();
             for (int i = 0; i < numMaterials; i++) {
                 AIMaterial material = AIMaterial.create(aiMaterials.get());
-                processMaterial(material);
+                processMaterial(material, materialCache, textureCache);
             }
 
             meshes = new Mesh[scene.mNumMeshes()];
             for (int i = 0; i < scene.mNumMeshes(); i++) {
                 AIMesh mesh = AIMesh.create(scene.mMeshes().get(i));
                 Material material = materials.get(mesh.mMaterialIndex());
-                meshes[i] = new Mesh(mesh, material);
+                meshes[i] = new Mesh(path + "_mesh" + i, mesh, material);
             }
 
         }
     }
 
-    private void createInternalTextures(AIScene scene, AIString sceneName) {
+    public String getPath() {
+        return path;
+    }
+
+    public boolean isDisposed() {
+        return disposed;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Model model = (Model) o;
+        return Objects.equals(path, model.path);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(path);
+    }
+
+    @Override
+    public String toString() {
+        return "Model(path=\"" + path + "\", numMeshes=\"" + meshes.length + ", numMaterials=" + materials.size() + ", numInternalTextures=" + textures.size() + ")";
+    }
+
+    private void createInternalTextures(AIScene scene) {
         int numInternalTextures = scene.mNumTextures();
         if (numInternalTextures > 0) {
             for (int i = 0; i < numInternalTextures; i++) {
                 AITexture aiTexture = AITexture.create(scene.mTextures().get(i));
                 this.textures.add(
                     new Texture(
-                        sceneName.dataString() + "_tex" + i,
+                        path + "_tex" + i,
                         aiTexture.pcDataCompressed(),
                         new int[]{aiTexture.mWidth()},
                         new int[]{aiTexture.mHeight()},
@@ -70,11 +93,11 @@ public class Model {
         }
     }
 
-    private void processMaterial(AIMaterial material) {
+    private void processMaterial(AIMaterial material, MaterialCache materialCache, TextureCache textureCache) {
         AIString name = AIString.calloc();
         Assimp.aiGetMaterialString(material, AI_MATKEY_NAME, 0, 0, name);
 
-        Texture diffuseTexture = retrieveMaterialTexture(material, aiTextureType_DIFFUSE);
+        Texture diffuseTexture = retrieveMaterialTexture(material, aiTextureType_DIFFUSE, textureCache);
 
         Vector3f diffuseColor = new Vector3f();
         try(AIColor4D color = AIColor4D.calloc()) {
@@ -101,20 +124,19 @@ public class Model {
         }
 
         Material mcloneMaterial = new Material(name.dataString(), diffuseTexture, diffuseColor, metallic[0], roughness[0]);
-        MaterialCache.loadMaterial(mcloneMaterial);
+        mcloneMaterial = materialCache.loadMaterial(mcloneMaterial);
         materials.add(mcloneMaterial);
 
         name.free();
     }
 
-    private Texture retrieveMaterialTexture(AIMaterial material, int textureType) {
+    private Texture retrieveMaterialTexture(AIMaterial material, int textureType, TextureCache textureCache) {
         AIString texturePath = AIString.calloc();
         aiGetMaterialTexture(material, textureType, 0, texturePath, (IntBuffer) null, null, null, null, null, null);
 
         Texture texture = null;
 
         if (texturePath.length() <= 0) {
-            //Logger.error("texturePath.length() <= 0");
             texturePath.free();
             return null;
         }
@@ -130,12 +152,27 @@ public class Model {
             } catch (NumberFormatException ignored) {
             }
         } else {
-            texture = TextureCache.load(Paths.get(path).getParent() + "/" + texturePath.dataString());
+            texture = textureCache.load(Paths.get(path).getParent() + "/" + texturePath.dataString());
         }
         texturePath.free();
 
         return texture;
     }
+
+    protected void dispose() {
+        if(!disposed) {
+            boolean disposed = true;
+            for (Mesh mesh : meshes) {
+                if (mesh != null) {
+                    mesh.dispose();
+                }
+            }
+        } else {
+            Logger.warn("Model.dispose", this, "Model \"" + path + "\" is already disposed!");
+        }
+    }
+
+    private boolean disposed = false;
 
     protected final Mesh[] getMeshes() {
         return meshes;
@@ -147,4 +184,3 @@ public class Model {
 
     private final String path;
 }
-

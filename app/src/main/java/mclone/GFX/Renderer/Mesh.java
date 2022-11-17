@@ -12,9 +12,11 @@ import org.lwjgl.system.MemoryUtil;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
+import java.util.Objects;
 
-public class Mesh {
-    public Mesh(AIMesh mesh, Material material) {
+class Mesh {
+    protected Mesh(String name, AIMesh mesh, Material material) {
+        this.name = name;
         try (MemoryStack stack = MemoryStack.stackPush()) {
             int numVertices = mesh.mNumVertices();
             vertexCount = numVertices;
@@ -72,9 +74,22 @@ public class Mesh {
         }
     }
 
-    public void tempDraw(Shader shader) {
-        material.getDiffuseTexture().bind(0);
-        GraphicsAPI.drawIndexed(shader, vbo, ibo, indexCount);
+    @Override
+    public String toString() {
+        return "Mesh(name=\"" + name + "\", " + "numVertices=" + vertexCount + ", numIndices=" + indexCount + "\")";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Mesh mesh = (Mesh) o;
+        return name.equals(mesh.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name);
     }
 
     protected final VertexBuffer getVertexBuffer() {
@@ -85,10 +100,23 @@ public class Mesh {
         return ibo;
     }
 
-    public int getVertexCount() { return vertexCount; }
-    public int getIndexCount() { return indexCount; }
-    public final Material getMaterial() { return material; }
+    protected int getVertexCount() { return vertexCount; }
+    protected int getIndexCount() { return indexCount; }
+    protected final Material getMaterial() { return material; }
 
+    protected void dispose() {
+        if(!disposed) {
+            vbo.dispose();
+            ibo.dispose();
+            disposed = true;
+        } else {
+            Logger.warn("Mesh.dispose", this, "Mesh is already disposed!");
+        }
+    }
+
+    private boolean disposed = false;
+
+    String name;
     private int vertexCount;
     private VertexBuffer vbo;
 

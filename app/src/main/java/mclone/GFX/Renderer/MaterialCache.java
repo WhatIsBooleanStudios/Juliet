@@ -1,14 +1,13 @@
 package mclone.GFX.Renderer;
 
-import mclone.GFX.OpenGL.Texture;
 import mclone.Logging.Logger;
 
 import java.util.HashMap;
 
 public class MaterialCache {
-    private MaterialCache(){}
+    protected MaterialCache(){}
 
-    public final static void loadMaterial(Material material) {
+    public Material loadMaterial(Material material) {
         if(materialMap.containsKey(material)) {
             if(!material.getName().equals(materialMap.get(material).getName())) {
                 Logger.warn(
@@ -16,7 +15,7 @@ public class MaterialCache {
                     "Material \"" + material.getName() + "\" is identical to the material with name \"" + materialMap.get(material).getName() + "\""
                 );
             }
-            material = materialMap.get(material);
+            return materialMap.get(material);
         } else {
             materialMap.put(
                 material,
@@ -28,6 +27,8 @@ public class MaterialCache {
                     material.getRoughness()
                 )
             );
+
+            return materialMap.get(material);
         }
     }
 
@@ -35,5 +36,5 @@ public class MaterialCache {
         materialMap.clear();
     }
 
-    private final static HashMap<Material, Material> materialMap = new HashMap<>();
+    private HashMap<Material, Material> materialMap = new HashMap<>();
 }
