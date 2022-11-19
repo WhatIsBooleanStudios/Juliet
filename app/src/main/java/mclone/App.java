@@ -15,8 +15,6 @@ import mclone.Logging.Logger;
 
 import java.nio.IntBuffer;
 
-import static org.lwjgl.glfw.GLFW.*;
-
 public class App {
     // The window handle
     private Window window;
@@ -80,7 +78,7 @@ public class App {
 
             boolean focusedOnEditor = false;
 
-            while (!window.shouldClose() && !window.keyPressed(GLFW_KEY_ESCAPE)) {
+            while (!window.shouldClose() && !window.keyPressed(Window.KEY_ESCAPE)) {
                 try(MemoryStack loopStack = MemoryStack.stackPush()) {
                     GraphicsAPI.setClearColor(0.0f, 0.0f, 0.0f, 1.0f);
                     GraphicsAPI.clear();
@@ -92,9 +90,9 @@ public class App {
                     Window.windowSystemPollEvents();
                     renderer.getGUIManager().endInputProcessing();
 
-                    if(window.keyPressed(GLFW_KEY_1)) {
+                    if(window.keyPressed(Window.KEY_1)) {
                         focusedOnEditor = false;
-                    } else if(window.keyPressed(GLFW_KEY_2)) {
+                    } else if(window.keyPressed(Window.KEY_2)) {
                         focusedOnEditor = true;
                     }
 
