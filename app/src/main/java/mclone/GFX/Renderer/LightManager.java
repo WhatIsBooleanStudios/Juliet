@@ -87,7 +87,7 @@ public class LightManager {
         updateSpotLights();
     }
 
-    protected void dispose() {
+    protected void shutdown() {
         pointLightUBO.dispose();
         spotLightUBO.dispose();
     }

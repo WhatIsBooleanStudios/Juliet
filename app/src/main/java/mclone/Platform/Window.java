@@ -141,10 +141,14 @@ public class Window {
         glfwDestroyWindow(windowHandle);
     }
 
+    public long getNativeHandle() {
+        return windowHandle;
+    }
+
     @Override
     public String toString() {
         return "Window(handle=" + windowHandle + ")";
     }
 
-    private long windowHandle;
+    protected long windowHandle;
 }
