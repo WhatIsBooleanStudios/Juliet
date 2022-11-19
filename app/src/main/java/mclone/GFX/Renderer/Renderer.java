@@ -12,7 +12,7 @@ import static org.lwjgl.nuklear.Nuklear.*;
 public class Renderer {
     public Renderer(Window window) {
         this.window = window;
-        guiManager = new GUIManager(window.getNativeHandle());
+        //guiManager = new GUIManager(window.getNativeHandle());
 
         String vertexShaderSource = Filesystem.getFileTextFromResourceDirectory("/Shaders/StaticMesh/StaticMesh.vert");
         String fragmentShaderSource = Filesystem.getFileTextFromResourceDirectory("/Shaders/StaticMesh/StaticMesh.frag");
@@ -33,7 +33,7 @@ public class Renderer {
         shaderBuilder.addUniform("numSpotLights", ShaderPrimitiveUtil.ShaderPrimitiveType.INT32);
         this.shader = shaderBuilder.createShader("StaticMeshShader");
 
-        guiManager.init();
+        //guiManager.init();
     }
 
     public void begin(@NotNull CameraController camera) {
@@ -73,7 +73,7 @@ public class Renderer {
     public void endModelRendering() {}
 
     public void end() {
-        guiManager.render(NK_ANTI_ALIASING_ON, GUIManager.MAX_VERTEX_BUFFER, GUIManager.MAX_ELEMENT_BUFFER);
+        //guiManager.render(NK_ANTI_ALIASING_ON, GUIManager.MAX_VERTEX_BUFFER, GUIManager.MAX_ELEMENT_BUFFER);
     }
 
     public void shutdown() {
@@ -81,14 +81,14 @@ public class Renderer {
         textureCache.clear();
         materialCache.clear();
         lightManager.shutdown();
-        guiManager.shutdown();
+        //guiManager.shutdown();
     }
 
     public TextureCache getTextureCache() { return textureCache; }
     public MaterialCache getMaterialCache() { return materialCache; }
     public ModelLoader getModelLoader() { return modelLoader; }
     public LightManager getLightManager() { return lightManager; }
-    public GUIManager getGUIManager() { return guiManager; }
+    //public GUIManager getGUIManager() { return guiManager; }
 
     private final Shader shader;
 
@@ -98,5 +98,5 @@ public class Renderer {
     final TextureCache textureCache = new TextureCache();
     final MaterialCache materialCache = new MaterialCache();
 
-    final GUIManager guiManager;
+    //final GUIManager guiManager;
 }

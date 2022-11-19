@@ -1,5 +1,6 @@
 package mclone;
 
+import imgui.ImGui;
 import mclone.GFX.Renderer.*;
 import mclone.GFX.OpenGL.*;
 import mclone.Platform.Window;
@@ -78,17 +79,19 @@ public class App {
 
             boolean focusedOnEditor = false;
 
+            GUIManager2 guiManager2 = new GUIManager2(window);
+            guiManager2.init();
+
             while (!window.shouldClose() && !window.keyPressed(Window.KEY_ESCAPE)) {
                 try(MemoryStack loopStack = MemoryStack.stackPush()) {
+                    window.makeContextCurrent();
                     GraphicsAPI.setClearColor(0.0f, 0.0f, 0.0f, 1.0f);
                     GraphicsAPI.clear();
 
                     window.setTitle("Window! Cursor pos: " + window.getMousePosition().get(0) + " "
                         + window.getMousePosition().get(1));
 
-                    renderer.getGUIManager().beginInputProcessing();
                     Window.windowSystemPollEvents();
-                    renderer.getGUIManager().endInputProcessing();
 
                     if(window.keyPressed(Window.KEY_1)) {
                         focusedOnEditor = false;
@@ -119,59 +122,21 @@ public class App {
                     renderer.drawModel(metalCube, new Vector3f(0.0f));
                     renderer.endModelRendering();
 
-                    try(MemoryStack nkStack = MemoryStack.stackPush()) {
-                        NkRect rect = NkRect.malloc(nkStack);
-
-                        NkContext ctx = renderer.getGUIManager().getContext();
-                        if (nk_begin(ctx,
-                            "Demo",
-                            nk_rect(2, 2, 230, 250, rect),
-                            NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_SCALABLE | NK_WINDOW_MINIMIZABLE | NK_WINDOW_TITLE
-                        )) {
-                            nk_layout_row_static(ctx, 30, 80, 1);
-                            if (nk_button_label(ctx, "button")) {
-                                System.out.println("button pressed");
-                            }
-
-                            nk_layout_row_dynamic(ctx, 30, 2);
-                            if (nk_option_label(ctx, "easy", op == EASY)) {
-                                op = EASY;
-                            }
-                            if (nk_option_label(ctx, "hard", op == HARD)) {
-                                op = HARD;
-                            }
-
-                            nk_layout_row_dynamic(ctx, 25, 1);
-                            nk_property_int(ctx, "Compression:", 0, compression, 100, 10, 1);
-
-                            nk_layout_row_dynamic(ctx, 20, 1);
-                            nk_label(ctx, "background:", NK_TEXT_LEFT);
-                            nk_layout_row_dynamic(ctx, 25, 1);
-                            if (nk_combo_begin_color(ctx, nk_rgb_cf(background, NkColor.malloc(stack)), NkVec2.malloc(stack).set(nk_widget_width(ctx), 400))) {
-                                nk_layout_row_dynamic(ctx, 120, 1);
-                                nk_color_picker(ctx, background, NK_RGBA);
-                                nk_layout_row_dynamic(ctx, 25, 1);
-                                background
-                                    .r(nk_propertyf(ctx, "#R:", 0, background.r(), 1.0f, 0.01f, 0.005f))
-                                    .g(nk_propertyf(ctx, "#G:", 0, background.g(), 1.0f, 0.01f, 0.005f))
-                                    .b(nk_propertyf(ctx, "#B:", 0, background.b(), 1.0f, 0.01f, 0.005f))
-                                    .a(nk_propertyf(ctx, "#A:", 0, background.a(), 1.0f, 0.01f, 0.005f));
-                                nk_combo_end(ctx);
-                            }
-                        }
-                        nk_end(ctx);
-                    }
 
                     renderer.end();
 
                     renderer.getLightManager().clearLights();
 
+                    guiManager2.newFrame();
+                    ImGui.showDemoWindow();
+                    guiManager2.endFrame();
 
                     window.swapBuffers();
 
                 }
             }
 
+            guiManager2.shutdown();
             renderer.shutdown();
         }
 
