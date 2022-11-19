@@ -51,6 +51,8 @@ public class GUIManager2 {
 
         ImGuiIO io = ImGui.getIO();
         io.addConfigFlags(ImGuiConfigFlags.ViewportsEnable | ImGuiConfigFlags.DockingEnable);
+        io.setConfigViewportsNoTaskBarIcon(true);
+        io.setConfigMacOSXBehaviors(true);
 
         glfwImpl.init(window, true);
         gl3Impl.init("#version 330");
