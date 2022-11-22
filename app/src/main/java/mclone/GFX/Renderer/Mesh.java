@@ -4,13 +4,13 @@ import mclone.GFX.OpenGL.*;
 import mclone.Logging.Logger;
 import org.lwjgl.assimp.AIFace;
 import org.lwjgl.assimp.AIMesh;
-import org.lwjgl.assimp.AIVector2D;
 import org.lwjgl.assimp.AIVector3D;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.system.MemoryUtil;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.sql.Array;
 import java.util.ArrayList;
 import java.util.Objects;
 
@@ -27,7 +27,12 @@ class Mesh {
             vertexAttributes.add(new VertexBufferLayout.VertexAttribute(ShaderPrimitiveUtil.ShaderPrimitiveType.FLOAT32, 3));
             vertexAttributes.add(new VertexBufferLayout.VertexAttribute(ShaderPrimitiveUtil.ShaderPrimitiveType.FLOAT32, 3));
             vertexAttributes.add(new VertexBufferLayout.VertexAttribute(ShaderPrimitiveUtil.ShaderPrimitiveType.FLOAT32, 2));
-            VertexBufferLayout layout = new VertexBufferLayout(vertexAttributes);
+            ArrayList<VertexBufferLayout.VertexAttribute> instanceAttributes = new ArrayList<>();
+            instanceAttributes.add(new VertexBufferLayout.VertexAttribute(ShaderPrimitiveUtil.ShaderPrimitiveType.FLOAT32, 4)); // world position
+            instanceAttributes.add(new VertexBufferLayout.VertexAttribute(ShaderPrimitiveUtil.ShaderPrimitiveType.FLOAT32, 4)); // world position
+            instanceAttributes.add(new VertexBufferLayout.VertexAttribute(ShaderPrimitiveUtil.ShaderPrimitiveType.FLOAT32, 4)); // world position
+            instanceAttributes.add(new VertexBufferLayout.VertexAttribute(ShaderPrimitiveUtil.ShaderPrimitiveType.FLOAT32, 4)); // world position
+            VertexBufferLayout layout = new VertexBufferLayout(vertexAttributes, instanceAttributes);
 
             FloatBuffer vertexBufferData = MemoryUtil.memAllocFloat(8 * numVertices);
             int index = 0;
@@ -47,7 +52,7 @@ class Mesh {
             index = 0;
 
 
-            vbo = new VertexBuffer(vertexBufferData, (long) layout.getStride() * vertexCount, HardwareBuffer.UsageHints.USAGE_STATIC, layout);
+            vbo = new VertexBuffer(vertexBufferData, (long) layout.getVertexAttributeStride() * vertexCount, HardwareBuffer.UsageHints.USAGE_STATIC, layout);
 
             int numIndices = 0;
             for (int i = 0; i < mesh.mNumFaces(); i++) {

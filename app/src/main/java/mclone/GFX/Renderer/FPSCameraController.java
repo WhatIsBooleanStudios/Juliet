@@ -18,15 +18,12 @@ public class FPSCameraController extends CameraController {
         this.camera.setPitch(pitch);
     }
 
-    private final Vector2f previousMousePosition = new Vector2f();
     boolean firstUpdate = true;
 
     public void update(Window window) {
         try(MemoryStack stack = MemoryStack.stackPush()) {
-            if (firstUpdate) {
-                previousMousePosition.set(window.getMousePosition());
-            }
-            final float cameraSpeed = 0.01f; // adjust accordingly
+            Vector2f initialMousePosition = window.getScreenCenter();
+            final float cameraSpeed = 0.03f; // adjust accordingly
             boolean positionModified = false;
             if (window.keyPressed(GLFW_KEY_W)) {
                 camera.offsetCameraPosition(camera.getDirection().mul(cameraSpeed));
@@ -46,8 +43,8 @@ public class FPSCameraController extends CameraController {
             }
 
             Vector2f mousePosition = window.getMousePosition();
-            Vector2f mouseOffset = new Vector2f(mousePosition).sub(previousMousePosition);
-            previousMousePosition.set(mousePosition);
+            Vector2f mouseOffset = new Vector2f(mousePosition).sub(initialMousePosition);
+            //previousMousePosition.set(mousePosition);
             float sensitivity = 0.001f;
             mouseOffset.mul(sensitivity);
 

@@ -21,17 +21,9 @@ import imgui.flag.ImGuiMouseCursor;
 import imgui.flag.ImGuiNavInput;
 import imgui.flag.ImGuiViewportFlags;
 import imgui.lwjgl3.glfw.ImGuiImplGlfwNative;
+import mclone.Logging.Logger;
 import org.lwjgl.PointerBuffer;
-import org.lwjgl.glfw.GLFWCharCallback;
-import org.lwjgl.glfw.GLFWCursorEnterCallback;
-import org.lwjgl.glfw.GLFWErrorCallback;
-import org.lwjgl.glfw.GLFWKeyCallback;
-import org.lwjgl.glfw.GLFWMonitorCallback;
-import org.lwjgl.glfw.GLFWMouseButtonCallback;
-import org.lwjgl.glfw.GLFWNativeWin32;
-import org.lwjgl.glfw.GLFWScrollCallback;
-import org.lwjgl.glfw.GLFWVidMode;
-import org.lwjgl.glfw.GLFWWindowFocusCallback;
+import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.GL;
 
 import java.nio.ByteBuffer;
@@ -120,12 +112,14 @@ public class ImGuiImplGlfw {
      * @param mods     click modifiers
      */
     public void mouseButtonCallback(final long windowId, final int button, final int action, final int mods) {
-        if (prevUserCallbackMouseButton != null && windowId == windowPtr) {
-            prevUserCallbackMouseButton.invoke(windowId, button, action, mods);
-        }
+        if(shouldApplyInput) {
+            if (prevUserCallbackMouseButton != null && windowId == windowPtr) {
+                prevUserCallbackMouseButton.invoke(windowId, button, action, mods);
+            }
 
-        if (action == GLFW_PRESS && button >= 0 && button < mouseJustPressed.length) {
-            mouseJustPressed[button] = true;
+            if (action == GLFW_PRESS && button >= 0 && button < mouseJustPressed.length) {
+                mouseJustPressed[button] = true;
+            }
         }
     }
 
@@ -137,13 +131,15 @@ public class ImGuiImplGlfw {
      * @param yOffset  scroll offset by y-axis
      */
     public void scrollCallback(final long windowId, final double xOffset, final double yOffset) {
-        if (prevUserCallbackScroll != null && windowId == windowPtr) {
-            prevUserCallbackScroll.invoke(windowId, xOffset, yOffset);
-        }
+        if(shouldApplyInput) {
+            if (prevUserCallbackScroll != null && windowId == windowPtr) {
+                prevUserCallbackScroll.invoke(windowId, xOffset, yOffset);
+            }
 
-        final ImGuiIO io = ImGui.getIO();
-        io.setMouseWheelH(io.getMouseWheelH() + (float) xOffset);
-        io.setMouseWheel(io.getMouseWheel() + (float) yOffset);
+            final ImGuiIO io = ImGui.getIO();
+            io.setMouseWheelH(io.getMouseWheelH() + (float) xOffset);
+            io.setMouseWheel(io.getMouseWheel() + (float) yOffset);
+        }
     }
 
     /**
@@ -156,27 +152,33 @@ public class ImGuiImplGlfw {
      * @param mods     press modifiers
      */
     public void keyCallback(final long windowId, final int key, final int scancode, final int action, final int mods) {
-        if (prevUserCallbackKey != null && windowId == windowPtr) {
-            prevUserCallbackKey.invoke(windowId, key, scancode, action, mods);
-        }
-
-        final ImGuiIO io = ImGui.getIO();
-
-        if (key >= 0 && key < keyOwnerWindows.length) {
-            if (action == GLFW_PRESS) {
-                io.setKeysDown(key, true);
-                keyOwnerWindows[key] = windowId;
-            } else if (action == GLFW_RELEASE) {
-                io.setKeysDown(key, false);
-                keyOwnerWindows[key] = 0;
+        if(shouldApplyInput) {
+            if (prevUserCallbackKey != null && windowId == windowPtr) {
+                prevUserCallbackKey.invoke(windowId, key, scancode, action, mods);
             }
-        }
 
-        io.setKeyCtrl(io.getKeysDown(GLFW_KEY_LEFT_CONTROL) || io.getKeysDown(GLFW_KEY_RIGHT_CONTROL));
-        io.setKeyShift(io.getKeysDown(GLFW_KEY_LEFT_SHIFT) || io.getKeysDown(GLFW_KEY_RIGHT_SHIFT));
-        io.setKeyAlt(io.getKeysDown(GLFW_KEY_LEFT_ALT) || io.getKeysDown(GLFW_KEY_RIGHT_ALT));
-        io.setKeySuper(io.getKeysDown(GLFW_KEY_LEFT_SUPER) || io.getKeysDown(GLFW_KEY_RIGHT_SUPER));
+            final ImGuiIO io = ImGui.getIO();
+
+            if (key >= 0 && key < keyOwnerWindows.length) {
+                if (action == GLFW_PRESS) {
+                    io.setKeysDown(key, true);
+                    keyOwnerWindows[key] = windowId;
+                } else if (action == GLFW_RELEASE) {
+                    io.setKeysDown(key, false);
+                    keyOwnerWindows[key] = 0;
+                }
+            }
+
+            io.setKeyCtrl(io.getKeysDown(GLFW_KEY_LEFT_CONTROL) || io.getKeysDown(GLFW_KEY_RIGHT_CONTROL));
+            io.setKeyShift(io.getKeysDown(GLFW_KEY_LEFT_SHIFT) || io.getKeysDown(GLFW_KEY_RIGHT_SHIFT));
+            io.setKeyAlt(io.getKeysDown(GLFW_KEY_LEFT_ALT) || io.getKeysDown(GLFW_KEY_RIGHT_ALT));
+            io.setKeySuper(io.getKeysDown(GLFW_KEY_LEFT_SUPER) || io.getKeysDown(GLFW_KEY_RIGHT_SUPER));
+        }
     }
+
+    private boolean shouldApplyInput = true;
+    protected void setShouldApplyInput(boolean apply) { shouldApplyInput = apply; }
+    protected boolean getShouldApplyInput() { return shouldApplyInput; }
 
     /**
      * Method to set the {@link GLFWWindowFocusCallback}.
@@ -185,11 +187,13 @@ public class ImGuiImplGlfw {
      * @param focused  is window focused
      */
     public void windowFocusCallback(final long windowId, final boolean focused) {
-        if (prevUserCallbackWindowFocus != null && windowId == windowPtr) {
-            prevUserCallbackWindowFocus.invoke(windowId, focused);
-        }
+        if (shouldApplyInput) {
+            if (prevUserCallbackWindowFocus != null && windowId == windowPtr) {
+                prevUserCallbackWindowFocus.invoke(windowId, focused);
+            }
 
-        ImGui.getIO().addFocusEvent(focused);
+            ImGui.getIO().addFocusEvent(focused);
+        }
     }
 
     /**
@@ -199,15 +203,17 @@ public class ImGuiImplGlfw {
      * @param entered  is cursor entered
      */
     public void cursorEnterCallback(final long windowId, final boolean entered) {
-        if (prevUserCallbackCursorEnter != null && windowId == windowPtr) {
-            prevUserCallbackCursorEnter.invoke(windowId, entered);
-        }
+        if(shouldApplyInput) {
+            if (prevUserCallbackCursorEnter != null && windowId == windowPtr) {
+                prevUserCallbackCursorEnter.invoke(windowId, entered);
+            }
 
-        if (entered) {
-            mouseWindowPtr = windowId;
-        }
-        if (!entered && mouseWindowPtr == windowId) {
-            mouseWindowPtr = 0;
+            if (entered) {
+                mouseWindowPtr = windowId;
+            }
+            if (!entered && mouseWindowPtr == windowId) {
+                mouseWindowPtr = 0;
+            }
         }
     }
 
@@ -218,12 +224,14 @@ public class ImGuiImplGlfw {
      * @param c        pressed char
      */
     public void charCallback(final long windowId, final int c) {
-        if (prevUserCallbackChar != null && windowId == windowPtr) {
-            prevUserCallbackChar.invoke(windowId, c);
-        }
+        if(shouldApplyInput) {
+            if (prevUserCallbackChar != null && windowId == windowPtr) {
+                prevUserCallbackChar.invoke(windowId, c);
+            }
 
-        final ImGuiIO io = ImGui.getIO();
-        io.addInputCharacter(c);
+            final ImGuiIO io = ImGui.getIO();
+            io.addInputCharacter(c);
+        }
     }
 
     /**
@@ -408,121 +416,127 @@ public class ImGuiImplGlfw {
     }
 
     private void updateMousePosAndButtons() {
-        final ImGuiIO io = ImGui.getIO();
+        if(shouldApplyInput) {
+            final ImGuiIO io = ImGui.getIO();
 
-        for (int i = 0; i < ImGuiMouseButton.COUNT; i++) {
-            // If a mouse press event came, always pass it as "mouse held this frame", so we don't miss click-release events that are shorter than 1 frame.
-            io.setMouseDown(i, mouseJustPressed[i] || glfwGetMouseButton(windowPtr, i) != 0);
-            mouseJustPressed[i] = false;
-        }
+            for (int i = 0; i < ImGuiMouseButton.COUNT; i++) {
+                // If a mouse press event came, always pass it as "mouse held this frame", so we don't miss click-release events that are shorter than 1 frame.
+                io.setMouseDown(i, mouseJustPressed[i] || glfwGetMouseButton(windowPtr, i) != 0);
+                mouseJustPressed[i] = false;
+            }
 
-        io.getMousePos(mousePosBackup);
-        io.setMousePos(-Float.MAX_VALUE, -Float.MAX_VALUE);
-        io.setMouseHoveredViewport(0);
+            io.getMousePos(mousePosBackup);
+            io.setMousePos(-Float.MAX_VALUE, -Float.MAX_VALUE);
+            io.setMouseHoveredViewport(0);
 
-        final ImGuiPlatformIO platformIO = ImGui.getPlatformIO();
+            final ImGuiPlatformIO platformIO = ImGui.getPlatformIO();
 
-        for (int n = 0; n < platformIO.getViewportsSize(); n++) {
-            final ImGuiViewport viewport = platformIO.getViewports(n);
-            final long windowPtr = viewport.getPlatformHandle();
+            for (int n = 0; n < platformIO.getViewportsSize(); n++) {
+                final ImGuiViewport viewport = platformIO.getViewports(n);
+                final long windowPtr = viewport.getPlatformHandle();
 
-            final boolean focused = glfwGetWindowAttrib(windowPtr, GLFW_FOCUSED) != 0;
+                final boolean focused = glfwGetWindowAttrib(windowPtr, GLFW_FOCUSED) != 0;
 
-            final long mouseWindowPtr = (this.mouseWindowPtr == windowPtr || focused) ? windowPtr : 0;
+                final long mouseWindowPtr = (this.mouseWindowPtr == windowPtr || focused) ? windowPtr : 0;
 
-            // Update mouse buttons
-            if (focused) {
-                for (int i = 0; i < ImGuiMouseButton.COUNT; i++) {
-                    io.setMouseDown(i, glfwGetMouseButton(windowPtr, i) != 0);
+                // Update mouse buttons
+                if (focused) {
+                    for (int i = 0; i < ImGuiMouseButton.COUNT; i++) {
+                        io.setMouseDown(i, glfwGetMouseButton(windowPtr, i) != 0);
+                    }
                 }
-            }
 
-            // Set OS mouse position from Dear ImGui if requested (rarely used, only when ImGuiConfigFlags_NavEnableSetMousePos is enabled by user)
-            // (When multi-viewports are enabled, all Dear ImGui positions are same as OS positions)
-            if (io.getWantSetMousePos() && focused) {
-                glfwSetCursorPos(windowPtr, mousePosBackup.x - viewport.getPosX(), mousePosBackup.y - viewport.getPosY());
-            }
+                // Set OS mouse position from Dear ImGui if requested (rarely used, only when ImGuiConfigFlags_NavEnableSetMousePos is enabled by user)
+                // (When multi-viewports are enabled, all Dear ImGui positions are same as OS positions)
+                if (io.getWantSetMousePos() && focused) {
+                    glfwSetCursorPos(windowPtr, mousePosBackup.x - viewport.getPosX(), mousePosBackup.y - viewport.getPosY());
+                }
 
-            // Set Dear ImGui mouse position from OS position
-            if (mouseWindowPtr != 0) {
-                glfwGetCursorPos(mouseWindowPtr, mouseX, mouseY);
+                // Set Dear ImGui mouse position from OS position
+                if (mouseWindowPtr != 0) {
+                    glfwGetCursorPos(mouseWindowPtr, mouseX, mouseY);
 
-                if (io.hasConfigFlags(ImGuiConfigFlags.ViewportsEnable)) {
-                    // Multi-viewport mode: mouse position in OS absolute coordinates (io.MousePos is (0,0) when the mouse is on the upper-left of the primary monitor)
-                    glfwGetWindowPos(windowPtr, windowX, windowY);
-                    io.setMousePos((float) mouseX[0] + windowX[0], (float) mouseY[0] + windowY[0]);
-                } else {
-                    // Single viewport mode: mouse position in client window coordinates (io.MousePos is (0,0) when the mouse is on the upper-left corner of the app window)
-                    io.setMousePos((float) mouseX[0], (float) mouseY[0]);
+                    if (io.hasConfigFlags(ImGuiConfigFlags.ViewportsEnable)) {
+                        // Multi-viewport mode: mouse position in OS absolute coordinates (io.MousePos is (0,0) when the mouse is on the upper-left of the primary monitor)
+                        glfwGetWindowPos(windowPtr, windowX, windowY);
+                        io.setMousePos((float) mouseX[0] + windowX[0], (float) mouseY[0] + windowY[0]);
+                    } else {
+                        // Single viewport mode: mouse position in client window coordinates (io.MousePos is (0,0) when the mouse is on the upper-left corner of the app window)
+                        io.setMousePos((float) mouseX[0], (float) mouseY[0]);
+                    }
                 }
             }
         }
     }
 
     private void updateMouseCursor() {
-        final ImGuiIO io = ImGui.getIO();
+        if(shouldApplyInput) {
+            final ImGuiIO io = ImGui.getIO();
 
-        final boolean noCursorChange = io.hasConfigFlags(ImGuiConfigFlags.NoMouseCursorChange);
-        final boolean cursorDisabled = glfwGetInputMode(windowPtr, GLFW_CURSOR) == GLFW_CURSOR_DISABLED;
+            final boolean noCursorChange = io.hasConfigFlags(ImGuiConfigFlags.NoMouseCursorChange);
+            final boolean cursorDisabled = glfwGetInputMode(windowPtr, GLFW_CURSOR) == GLFW_CURSOR_DISABLED;
 
-        if (noCursorChange || cursorDisabled) {
-            return;
-        }
+            if (noCursorChange || cursorDisabled) {
+                return;
+            }
 
-        final int imguiCursor = ImGui.getMouseCursor();
-        final ImGuiPlatformIO platformIO = ImGui.getPlatformIO();
+            final int imguiCursor = ImGui.getMouseCursor();
+            final ImGuiPlatformIO platformIO = ImGui.getPlatformIO();
 
-        for (int n = 0; n < platformIO.getViewportsSize(); n++) {
-            final long windowPtr = platformIO.getViewports(n).getPlatformHandle();
+            for (int n = 0; n < platformIO.getViewportsSize(); n++) {
+                final long windowPtr = platformIO.getViewports(n).getPlatformHandle();
 
-            if (imguiCursor == ImGuiMouseCursor.None || io.getMouseDrawCursor()) {
-                // Hide OS mouse cursor if imgui is drawing it or if it wants no cursor
-                glfwSetInputMode(windowPtr, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-            } else {
-                // Show OS mouse cursor
-                // FIXME-PLATFORM: Unfocused windows seems to fail changing the mouse cursor with GLFW 3.2, but 3.3 works here.
-                glfwSetCursor(windowPtr, mouseCursors[imguiCursor] != 0 ? mouseCursors[imguiCursor] : mouseCursors[ImGuiMouseCursor.Arrow]);
-                glfwSetInputMode(windowPtr, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+                if (imguiCursor == ImGuiMouseCursor.None || io.getMouseDrawCursor()) {
+                    // Hide OS mouse cursor if imgui is drawing it or if it wants no cursor
+                    glfwSetInputMode(windowPtr, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+                } else {
+                    // Show OS mouse cursor
+                    // FIXME-PLATFORM: Unfocused windows seems to fail changing the mouse cursor with GLFW 3.2, but 3.3 works here.
+                    glfwSetCursor(windowPtr, mouseCursors[imguiCursor] != 0 ? mouseCursors[imguiCursor] : mouseCursors[ImGuiMouseCursor.Arrow]);
+                    glfwSetInputMode(windowPtr, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+                }
             }
         }
     }
 
     private void updateGamepads() {
-        final ImGuiIO io = ImGui.getIO();
+        if(shouldApplyInput) {
+            final ImGuiIO io = ImGui.getIO();
 
-        if (!io.hasConfigFlags(ImGuiConfigFlags.NavEnableGamepad)) {
-            return;
-        }
+            if (!io.hasConfigFlags(ImGuiConfigFlags.NavEnableGamepad)) {
+                return;
+            }
 
-        io.setNavInputs(emptyNavInputs);
+            io.setNavInputs(emptyNavInputs);
 
-        final ByteBuffer buttons = glfwGetJoystickButtons(GLFW_JOYSTICK_1);
-        final int buttonsCount = buttons.limit();
+            final ByteBuffer buttons = glfwGetJoystickButtons(GLFW_JOYSTICK_1);
+            final int buttonsCount = buttons.limit();
 
-        final FloatBuffer axis = glfwGetJoystickAxes(GLFW_JOYSTICK_1);
-        final int axisCount = axis.limit();
+            final FloatBuffer axis = glfwGetJoystickAxes(GLFW_JOYSTICK_1);
+            final int axisCount = axis.limit();
 
-        mapButton(ImGuiNavInput.Activate, 0, buttons, buttonsCount, io);   // Cross / A
-        mapButton(ImGuiNavInput.Cancel, 1, buttons, buttonsCount, io);     // Circle / B
-        mapButton(ImGuiNavInput.Menu, 2, buttons, buttonsCount, io);       // Square / X
-        mapButton(ImGuiNavInput.Input, 3, buttons, buttonsCount, io);      // Triangle / Y
-        mapButton(ImGuiNavInput.DpadLeft, 13, buttons, buttonsCount, io);  // D-Pad Left
-        mapButton(ImGuiNavInput.DpadRight, 11, buttons, buttonsCount, io); // D-Pad Right
-        mapButton(ImGuiNavInput.DpadUp, 10, buttons, buttonsCount, io);    // D-Pad Up
-        mapButton(ImGuiNavInput.DpadDown, 12, buttons, buttonsCount, io);  // D-Pad Down
-        mapButton(ImGuiNavInput.FocusPrev, 4, buttons, buttonsCount, io);  // L1 / LB
-        mapButton(ImGuiNavInput.FocusNext, 5, buttons, buttonsCount, io);  // R1 / RB
-        mapButton(ImGuiNavInput.TweakSlow, 4, buttons, buttonsCount, io);  // L1 / LB
-        mapButton(ImGuiNavInput.TweakFast, 5, buttons, buttonsCount, io);  // R1 / RB
-        mapAnalog(ImGuiNavInput.LStickLeft, 0, -0.3f, -0.9f, axis, axisCount, io);
-        mapAnalog(ImGuiNavInput.LStickRight, 0, +0.3f, +0.9f, axis, axisCount, io);
-        mapAnalog(ImGuiNavInput.LStickUp, 1, +0.3f, +0.9f, axis, axisCount, io);
-        mapAnalog(ImGuiNavInput.LStickDown, 1, -0.3f, -0.9f, axis, axisCount, io);
+            mapButton(ImGuiNavInput.Activate, 0, buttons, buttonsCount, io);   // Cross / A
+            mapButton(ImGuiNavInput.Cancel, 1, buttons, buttonsCount, io);     // Circle / B
+            mapButton(ImGuiNavInput.Menu, 2, buttons, buttonsCount, io);       // Square / X
+            mapButton(ImGuiNavInput.Input, 3, buttons, buttonsCount, io);      // Triangle / Y
+            mapButton(ImGuiNavInput.DpadLeft, 13, buttons, buttonsCount, io);  // D-Pad Left
+            mapButton(ImGuiNavInput.DpadRight, 11, buttons, buttonsCount, io); // D-Pad Right
+            mapButton(ImGuiNavInput.DpadUp, 10, buttons, buttonsCount, io);    // D-Pad Up
+            mapButton(ImGuiNavInput.DpadDown, 12, buttons, buttonsCount, io);  // D-Pad Down
+            mapButton(ImGuiNavInput.FocusPrev, 4, buttons, buttonsCount, io);  // L1 / LB
+            mapButton(ImGuiNavInput.FocusNext, 5, buttons, buttonsCount, io);  // R1 / RB
+            mapButton(ImGuiNavInput.TweakSlow, 4, buttons, buttonsCount, io);  // L1 / LB
+            mapButton(ImGuiNavInput.TweakFast, 5, buttons, buttonsCount, io);  // R1 / RB
+            mapAnalog(ImGuiNavInput.LStickLeft, 0, -0.3f, -0.9f, axis, axisCount, io);
+            mapAnalog(ImGuiNavInput.LStickRight, 0, +0.3f, +0.9f, axis, axisCount, io);
+            mapAnalog(ImGuiNavInput.LStickUp, 1, +0.3f, +0.9f, axis, axisCount, io);
+            mapAnalog(ImGuiNavInput.LStickDown, 1, -0.3f, -0.9f, axis, axisCount, io);
 
-        if (axisCount > 0 && buttonsCount > 0) {
-            io.addBackendFlags(ImGuiBackendFlags.HasGamepad);
-        } else {
-            io.removeBackendFlags(ImGuiBackendFlags.HasGamepad);
+            if (axisCount > 0 && buttonsCount > 0) {
+                io.addBackendFlags(ImGuiBackendFlags.HasGamepad);
+            } else {
+                io.removeBackendFlags(ImGuiBackendFlags.HasGamepad);
+            }
         }
     }
 
@@ -697,6 +711,7 @@ public class ImGuiImplGlfw {
                     }
                 }
 
+                Callbacks.glfwFreeCallbacks(data.window);
                 glfwDestroyWindow(data.window);
             }
 

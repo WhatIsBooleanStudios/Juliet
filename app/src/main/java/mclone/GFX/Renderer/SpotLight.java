@@ -10,6 +10,7 @@ public class SpotLight {
         this.color = new Vector3f(color);
         this.intensity = intensity;
         this.cutoff = cutoff;
+        update();
     }
 
     public Vector3fc getPosition() {

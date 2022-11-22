@@ -1,5 +1,7 @@
 package mclone.GFX.OpenGL;
 
+import mclone.Logging.Logger;
+
 import java.util.ArrayList;
 
 /**
@@ -49,26 +51,27 @@ public class VertexBufferLayout {
      * Creates a VertexBufferLayout
      * @param attributes A list of all the attributes (in order) of the layout
      */
-    public VertexBufferLayout(ArrayList<VertexAttribute> attributes) {
-        this.attributes = attributes;
+    public VertexBufferLayout(ArrayList<VertexAttribute> vertexAttributes, ArrayList<VertexAttribute> instanceAttributes) {
+        this.vertexAttributes = vertexAttributes;
+        this.instanceAttributes = instanceAttributes;
     }
 
     /**
      * Get the attribute at the index specified
      * @param index The index, where 0 <= index < getNumAttributes()
      * @return the attribute at the specified index
-     * @see VertexBufferLayout#getNumAttributes()
+     * @see VertexBufferLayout#getNumVertexAttributes()
      */
-    public VertexAttribute getAttribute(int index) {
-        return attributes.get(index);
+    public VertexAttribute getVertexAttribute(int index) {
+        return vertexAttributes.get(index);
     }
 
     /**
      * Get the number of attributes in the layout
      * @return The number of attributes in the layout
      */
-    public int getNumAttributes() {
-        return attributes.size();
+    public int getNumVertexAttributes() {
+        return vertexAttributes.size();
     }
 
     /**
@@ -76,9 +79,9 @@ public class VertexBufferLayout {
      * would be the byte distance between one attribute of one vertex to the same attribute of another
      * @return The size of one Vertex's worth of attributes
      */
-    public int getStride() {
+    public int getVertexAttributeStride() {
         int stride = 0;
-        for(VertexAttribute attribute : attributes) {
+        for(VertexAttribute attribute : vertexAttributes) {
             int size = attribute.getSize();
             if(size <= 0) {
                 break;
@@ -89,5 +92,42 @@ public class VertexBufferLayout {
         return stride;
     }
 
-    ArrayList<VertexAttribute> attributes;
+    /**
+     * Get the instance attribute at the index specified
+     * @param index The index, where 0 <= index < getNumAttributes()
+     * @return the attribute at the specified index
+     * @see VertexBufferLayout#getNumInstanceAttributes()
+     */
+    public VertexAttribute getInstanceAttribute(int index) {
+        return instanceAttributes.get(index);
+    }
+
+    /**
+     * Get the number of instance attributes in the layout
+     * @return The number of attributes in the layout
+     */
+    public int getNumInstanceAttributes() {
+        return instanceAttributes.size();
+    }
+
+    /**
+     * Get the total size of all the attributes. This means that if you had an array of these attributes, the return value
+     * would be the byte distance between one attribute of one vertex to the same attribute of another
+     * @return The size of one Vertex's worth of attributes
+     */
+    public int getInstanceAttributeStride() {
+        int stride = 0;
+        for(VertexAttribute attribute : instanceAttributes) {
+            int size = attribute.getSize();
+            if(size <= 0) {
+                break;
+            }
+            stride += size;
+        }
+
+        return stride;
+    }
+
+    ArrayList<VertexAttribute> vertexAttributes;
+    ArrayList<VertexAttribute> instanceAttributes;
 }

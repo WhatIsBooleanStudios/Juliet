@@ -37,7 +37,7 @@ public class VertexBuffer extends HardwareBuffer {
      */
     public void setData(Buffer data, long size) {
         glBindVertexArray(vaoID);
-        nglBufferSubData(GL_VERTEX_ARRAY, 0, size, memAddress(data));
+        nglBufferSubData(GL_ARRAY_BUFFER, 0, size, memAddress(data));
     }
 
     /**
@@ -63,6 +63,40 @@ public class VertexBuffer extends HardwareBuffer {
     @Override
     public long getMaxSize() {
         return maxSize;
+    }
+
+    public void setInstanceBuffer(InstanceBuffer instanceBuffer) {
+        glBindBuffer(GL_ARRAY_BUFFER, instanceBuffer.id);
+        glBindVertexArray(vaoID);
+
+        if(currentInstanceBuffer != instanceBuffer) {
+            long offset = 0;
+            for (int i = 0; i < layout.getNumInstanceAttributes(); i++) {
+                VertexBufferLayout.VertexAttribute attrib = layout.getInstanceAttribute(i);
+                ShaderPrimitiveUtil.ShaderPrimitiveType type = attrib.getType();
+                if (type == ShaderPrimitiveUtil.ShaderPrimitiveType.UINT32 ||
+                    type == ShaderPrimitiveUtil.ShaderPrimitiveType.INT32 ||
+                    type == ShaderPrimitiveUtil.ShaderPrimitiveType.UINT16 ||
+                    type == ShaderPrimitiveUtil.ShaderPrimitiveType.INT16) {
+                    instanceBuffer.bind();
+                    glVertexAttribIPointer(i + layout.getNumVertexAttributes(), attrib.getCount(), ShaderPrimitiveUtil.mapShaderTypeToGLType(type), layout.getInstanceAttributeStride(), offset);
+                    instanceBuffer.unBind();
+                } else if (type == ShaderPrimitiveUtil.ShaderPrimitiveType.FLOAT32) {
+                    instanceBuffer.bind();
+                    glVertexAttribPointer(i + layout.getNumVertexAttributes(), attrib.getCount(), ShaderPrimitiveUtil.mapShaderTypeToGLType(type), false, layout.getInstanceAttributeStride(), offset);
+                    instanceBuffer.unBind();
+                } else if (type == ShaderPrimitiveUtil.ShaderPrimitiveType.FLOAT64) {
+                    Logger.error("VertexBuffer.setVertexBufferToVertexArray", this, "OpenGL 3.3 does not support 64 bit floats in vertex arrays!");
+                    // TODO: consider upgrading to opengl 4.5 which was released in 2014
+                    //glVertexAttribLPointer(i, attrib.getCount(), ShaderPrimitiveUtil.mapShaderTypeToGLType(type), false, m_layout.getStride(), offset);
+                }
+                glEnableVertexAttribArray(i + layout.getNumVertexAttributes());
+                glVertexAttribDivisor(i + layout.getNumVertexAttributes(), 1);
+
+                offset += (long) ShaderPrimitiveUtil.getSizeOfType(type) * attrib.getCount();
+            }
+            currentInstanceBuffer = instanceBuffer;
+        }
     }
 
     /**
@@ -106,16 +140,16 @@ public class VertexBuffer extends HardwareBuffer {
         glBindBuffer(GL_ARRAY_BUFFER, vboID);
 
         long offset = 0;
-        for (int i = 0; i < layout.getNumAttributes(); i++) {
-            VertexBufferLayout.VertexAttribute attrib = layout.getAttribute(i);
+        for (int i = 0; i < layout.getNumVertexAttributes(); i++) {
+            VertexBufferLayout.VertexAttribute attrib = layout.getVertexAttribute(i);
             ShaderPrimitiveUtil.ShaderPrimitiveType type = attrib.getType();
             if (type == ShaderPrimitiveUtil.ShaderPrimitiveType.UINT32  ||
                 type == ShaderPrimitiveUtil.ShaderPrimitiveType.INT32   ||
                 type == ShaderPrimitiveUtil.ShaderPrimitiveType.UINT16  ||
                 type == ShaderPrimitiveUtil.ShaderPrimitiveType.INT16) {
-                glVertexAttribIPointer(i, attrib.getCount(), ShaderPrimitiveUtil.mapShaderTypeToGLType(type), layout.getStride(), offset);
+                glVertexAttribIPointer(i, attrib.getCount(), ShaderPrimitiveUtil.mapShaderTypeToGLType(type), layout.getVertexAttributeStride(), offset);
             } else if(type == ShaderPrimitiveUtil.ShaderPrimitiveType.FLOAT32) {
-                glVertexAttribPointer(i, attrib.getCount(), ShaderPrimitiveUtil.mapShaderTypeToGLType(type), false, layout.getStride(), offset);
+                glVertexAttribPointer(i, attrib.getCount(), ShaderPrimitiveUtil.mapShaderTypeToGLType(type), false, layout.getVertexAttributeStride(), offset);
             } else if(type == ShaderPrimitiveUtil.ShaderPrimitiveType.FLOAT64) {
                 Logger.error("VertexBuffer.setVertexBufferToVertexArray", this, "OpenGL 3.3 does not support 64 bit floats in vertex arrays!");
                 // TODO: consider upgrading to opengl 4.5 which was released in 2014
@@ -146,8 +180,9 @@ public class VertexBuffer extends HardwareBuffer {
         return "VertexBuffer(VBOID=" + vboID + " VAOID=" + vaoID + ")";
     }
 
-    private int vaoID = 0;
+    protected int vaoID = 0;
     private int vboID = 0;
     private VertexBufferLayout layout;
+    private InstanceBuffer currentInstanceBuffer = null;
     private final long maxSize;
 }

@@ -26,17 +26,6 @@ public class GraphicsAPI {
         debugCb = GLUtil.setupDebugMessageCallback(System.out);
         setGLDebugMessageControl(GLDebugMessageSeverity.NOTIFICATION, false);
         glEnable(GL_MULTISAMPLE);
-
-        org.lwjgl.opengl.GLCapabilities caps = org.lwjgl.opengl.GL.createCapabilities();
-        int GL_MAX_VERTEX_ATTRIBS = 16;
-        if (caps.OpenGL20) {
-            GL_MAX_VERTEX_ATTRIBS = org.lwjgl.opengl.GL11.glGetInteger(org.lwjgl.opengl.GL20.GL_MAX_VERTEX_ATTRIBS);
-            System.out.println("here1");
-        } else if (caps.GL_ARB_vertex_shader) {
-            GL_MAX_VERTEX_ATTRIBS = org.lwjgl.opengl.GL11.glGetInteger(org.lwjgl.opengl.ARBVertexShader.GL_MAX_VERTEX_ATTRIBS_ARB);
-            System.out.println("here2");
-        }
-        System.out.println(GL_MAX_VERTEX_ATTRIBS);
     }
 
     /**
@@ -92,6 +81,14 @@ public class GraphicsAPI {
         vbo.bind();
         ibo.bind();
         glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
+    }
+
+    public static void drawInstancedIndexed(Shader shader, VertexBuffer vbo, IndexBuffer ibo, InstanceBuffer instanceBuffer, int indexCount, int instanceCount) {
+        shader.bind();
+        vbo.bind();
+        vbo.setInstanceBuffer(instanceBuffer);
+        instanceBuffer.bind();
+        glDrawElementsInstanced(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0, instanceCount);
     }
 
     // Do not create an instance of this

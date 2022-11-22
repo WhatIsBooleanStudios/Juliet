@@ -5,6 +5,7 @@ import static org.lwjgl.glfw.Callbacks.*;
 import static org.lwjgl.opengl.GL33.*;
 
 import mclone.Logging.Logger;
+import org.joml.Vector3f;
 import org.lwjgl.glfw.*;
 import org.joml.Vector2f;
 import org.lwjgl.system.MemoryStack;
@@ -295,4 +296,8 @@ public class Window {
     }
 
     protected long windowHandle;
+
+    public Vector2f getScreenCenter() {
+        return new Vector2f(getWidth() / 2.0f, getHeight() / 2.0f);
+    }
 }
