@@ -9,7 +9,6 @@ import org.joml.Matrix4f;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
 import org.lwjgl.BufferUtils;
-import org.lwjgl.nuklear.*;
 import org.lwjgl.system.MemoryStack;
 
 import mclone.Logging.Logger;
@@ -89,16 +88,6 @@ public class App {
             instanceFloatBuffer.put(instanceData);
             instanceFloatBuffer.flip();
             InstanceBuffer instanceBuffer = new InstanceBuffer(instanceFloatBuffer, instanceData.length * 4L, HardwareBuffer.UsageHints.USAGE_DYNAMIC);
-
-            int EASY = 0;
-            int HARD = 1;
-            int op = EASY;
-            IntBuffer compression = BufferUtils.createIntBuffer(1).put(0, 20);
-            NkColorf background = NkColorf.create()
-                .r(0.10f)
-                .g(0.18f)
-                .b(0.24f)
-                .a(1.0f);
 
             boolean focusedOnEditor = false;
 

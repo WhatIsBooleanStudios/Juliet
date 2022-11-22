@@ -15,8 +15,6 @@ import java.nio.Buffer;
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 
-import static org.lwjgl.nuklear.Nuklear.*;
-
 public class Renderer {
     public Renderer(Window window) {
         this.window = window;
