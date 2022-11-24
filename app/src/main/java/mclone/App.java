@@ -1,8 +1,13 @@
 package mclone;
 
 import imgui.ImGui;
+import mclone.ECS.Entity;
+import mclone.ECS.EntityScriptComponent;
+import mclone.ECS.NameComponent;
+import mclone.ECS.Scene;
 import mclone.GFX.Renderer.*;
 import mclone.GFX.OpenGL.*;
+import mclone.Platform.TimeStep;
 import mclone.Platform.Window;
 
 import org.joml.Matrix4f;
@@ -91,8 +96,16 @@ public class App {
 
             boolean focusedOnEditor = false;
 
+            TimeStep timeStep = new TimeStep();
+
+            Scene scene = new Scene();
+            Entity entity = scene.createEntity();
+            entity.addComponent(new NameComponent("My First Entity!"));
+            entity.addComponent(new EntityScriptComponent("mclone.TestScript"));
+
             while (!window.shouldClose() && !window.keyPressed(Window.KEY_ESCAPE)) {
                 try(MemoryStack loopStack = MemoryStack.stackPush()) {
+                    float delta = timeStep.updateAndCalculateDelta();
                     window.makeContextCurrent();
                     GraphicsAPI.setClearColor(0.0f, 0.0f, 0.0f, 1.0f);
                     GraphicsAPI.clear();
@@ -116,13 +129,14 @@ public class App {
                     }
                     window.captureCursor(focusedOnEditor);
 
+                    scene.process(delta);
+
                     renderer.getLightManager().addPointLight(pointLight0);
                     renderer.getLightManager().addPointLight(pointLight1);
                     renderer.getLightManager().addPointLight(pointLight2);
                     renderer.getLightManager().addPointLight(pointLight3);
                     spotLight.setPosition(fpsCameraController.getCameraPosition());
                     spotLight.setDirection(fpsCameraController.getCameraDirection());
-                    //renderer.getLightManager().addSpotLight(spotLight);
                     renderer.getLightManager().addSpotLight(topSpotLight);
 
                     renderer.begin();
