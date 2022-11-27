@@ -2,6 +2,7 @@ package mclone.GFX.Renderer;
 
 import mclone.GFX.OpenGL.HardwareBuffer;
 import mclone.GFX.OpenGL.UniformBuffer;
+import mclone.Logging.Logger;
 import mclone.Platform.Window;
 import org.joml.Vector2f;
 import org.joml.Vector3f;
@@ -11,11 +12,14 @@ import org.lwjgl.system.MemoryStack;
 import static org.lwjgl.glfw.GLFW.*;
 
 public class FPSCameraController extends CameraController {
-    public FPSCameraController(Window window, Vector3f position, float pitch, float yaw) {
-        this.camera = new Camera((float)window.getWidth() / (float) window.getHeight(), (float)Math.PI / 4.0f);
-        this.camera.setCameraPosition(position);
-        this.camera.setYaw(yaw);
-        this.camera.setPitch(pitch);
+    public FPSCameraController(Window window, Vector3f position, float aspectRatio, float pitch, float yaw) {
+        try(MemoryStack stack = MemoryStack.stackPush()) {
+            this.camera = new Camera(aspectRatio, (float) Math.PI / 4.0f);
+            this.camera.setCameraPosition(position);
+            this.camera.setYaw(yaw);
+            this.camera.setPitch(pitch);
+            ubo.setData(camera.getProjectionXView().get(stack.mallocFloat(16)), 16 * 4);
+        }
     }
 
     boolean firstUpdate = true;
@@ -66,6 +70,13 @@ public class FPSCameraController extends CameraController {
     @Override
     public Vector3fc getCameraPosition() {
         return camera.getPosition();
+    }
+
+    public void updateProjection(float ratio, float fovY) {
+        try(MemoryStack stack = MemoryStack.stackPush()) {
+            camera.updateProjection(ratio, fovY);
+            ubo.setData(camera.getProjectionXView().get(stack.mallocFloat(16)), 16 * 4);
+        }
     }
 
     public Vector3fc getCameraDirection() {

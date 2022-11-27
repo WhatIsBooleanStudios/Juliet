@@ -53,6 +53,7 @@ dependencies {
 	implementation "org.joml:joml:${jomlVersion}"
     implementation "io.github.spair:imgui-java-app:1.86.3"
     implementation "net.onedaybeard.artemis:artemis-odb:2.3.0"
+    implementation 'net.onedaybeard.artemis:artemis-odb-serializer-json:2.3.0'
 }
 
 application {

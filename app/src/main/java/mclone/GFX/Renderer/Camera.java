@@ -16,6 +16,11 @@ public class Camera {
         this.projectionXView = calculate();
     }
 
+    public void updateProjection(float aspectRatio, float fovY) {
+        this.projection.setPerspective(fovY, aspectRatio, 0.08f, 100.0f);
+        this.projectionXView.set(calculate());
+    }
+
     /**
      * Calculates the ProjectionXView Mat4x4
      * @return Returns a Mat4x4 of the ProjectionXView

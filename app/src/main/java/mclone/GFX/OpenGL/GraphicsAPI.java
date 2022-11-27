@@ -1,5 +1,6 @@
 package mclone.GFX.OpenGL;
 
+import mclone.Platform.Window;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GLUtil;
 import org.lwjgl.system.Callback;
@@ -21,11 +22,11 @@ public class GraphicsAPI {
     /**
      * Initialize the wrapper
      */
-    public static void initialize() {
+    public static void initializeWindow(Window window) {
+        window.makeContextCurrent();
         GL.createCapabilities();
         debugCb = GLUtil.setupDebugMessageCallback(System.out);
         setGLDebugMessageControl(GLDebugMessageSeverity.NOTIFICATION, false);
-        glEnable(GL_MULTISAMPLE);
     }
 
     /**
@@ -53,6 +54,10 @@ public class GraphicsAPI {
     public static void clear() {
         glEnable(GL_DEPTH_TEST);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    }
+
+    public static void updateViewport(int width, int height) {
+        glViewport(0, 0, width, height);
     }
 
     /**
