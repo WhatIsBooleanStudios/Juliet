@@ -193,7 +193,7 @@ public class Editor {
         int windowHeight = (int)regionAvail.y;
 
         if(sceneFramebuffer == null) {
-            sceneFramebuffer = new FrameBuffer(windowWidth, windowHeight);
+            sceneFramebuffer = new FrameBuffer(windowWidth == 0 ? 1 : windowWidth, windowHeight == 0 ? 1 : windowHeight);
         } else if(sceneFramebuffer.getWidth() != windowWidth || sceneFramebuffer.getHeight() != windowHeight) {
             sceneFramebuffer.resize(windowWidth, windowHeight);
         }
@@ -220,7 +220,6 @@ public class Editor {
             mainWindow.captureCursor(false);
             focusedOnScene = false;
         }
-
         if(focusedOnScene) {
             cameraController.update(mainWindow);
             mainWindow.setMousePosition(mainWindow.getScreenCenter());
