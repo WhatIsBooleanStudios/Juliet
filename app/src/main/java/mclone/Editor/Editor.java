@@ -1,7 +1,14 @@
 package mclone.Editor;
 
+import com.artemis.utils.IntBag;
 import imgui.ImGui;
 import imgui.ImVec2;
+import imgui.flag.ImGuiCond;
+import imgui.flag.ImGuiInputTextFlags;
+import imgui.flag.ImGuiTreeNodeFlags;
+import imgui.flag.ImGuiWindowFlags;
+import imgui.type.ImBoolean;
+import imgui.type.ImString;
 import mclone.ECS.Entity;
 import mclone.ECS.EntityScriptComponent;
 import mclone.ECS.NameComponent;
@@ -13,6 +20,7 @@ import mclone.GFX.Renderer.FPSCameraController;
 import mclone.GFX.Renderer.Model;
 import mclone.GFX.Renderer.Renderer;
 import mclone.Logging.Logger;
+import mclone.Platform.TimeStep;
 import mclone.Platform.Window;
 import org.joml.Vector3f;
 
@@ -35,9 +43,11 @@ public class Editor {
 
         tempScene = new Scene();
         tempScene.disableScriptSystem();
-        Entity tempEntity = tempScene.createEntity();
-        tempEntity.addComponent(new NameComponent("Entity_test"));
+        Entity tempEntity = tempScene.createEntity("ENTITY_TEST0");
         tempEntity.addComponent(new EntityScriptComponent("mclone.TestScript"));
+        Entity tempEntity2 = tempScene.createEntity("ENTITY_TEST1");
+        tempEntity2.addComponent(new EntityScriptComponent("mclone.TestScript"));
+        tempScene.process(0.0f);
     }
 
     public void update(float delta) {
@@ -56,12 +66,10 @@ public class Editor {
                 ImGui.endMainMenuBar();
 
                 ImGui.dockSpaceOverViewport();
-                ImGui.begin("Scene Tree");
-                tempScene.process(delta);
-                tempScene.tempSaveToFile();
-                ImGui.end();
                 ImGui.showDemoWindow();
+                displayEntityTree();
                 renderScene();
+                displayPerformance(delta);
             }
             renderer.end();
         }
@@ -69,8 +77,98 @@ public class Editor {
         mainWindow.swapBuffers();
     }
 
-    private void displayEntityTree(Scene scene) {
+    private void displayPerformance(float deltaTime) {
+        ImGui.begin("performance");
+        ImGui.text("dt = " + String.format("%.2f", deltaTime) + "ms");
+        ImGui.end();
+    }
 
+    Entity currentSelectedEntity = null;
+    private void displayEntityTree() {
+        tempScene.__compileEntitiesList();
+        ImGui.begin("Scene Hierarchy");
+        for(int i = 0; i < tempScene.__getNumEntities(); i++) {
+            int nodeFlags = ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.NoTreePushOnOpen;
+            Entity entity = tempScene.__getEntityByInternalListIndex(i);
+
+            if (currentSelectedEntity != null && currentSelectedEntity.equals(entity)) {
+                nodeFlags |= ImGuiTreeNodeFlags.Selected;
+            }
+
+            if(ImGui.treeNodeEx(i, nodeFlags, entity.getName())) {
+                if (ImGui.isItemClicked() || ImGui.isItemFocused()) {
+                    currentSelectedEntity = entity;
+                }
+            }
+        }
+        ImGui.text(currentSelectedEntity != null ? currentSelectedEntity.toString() : "null");
+        ImGui.end();
+
+        displayEntityPropertyList();
+    }
+
+    private static class ImGuiEntityPropertiesFields {
+        public ImGuiEntityPropertiesFields() {}
+        public ImString scriptPath = new ImString();
+    } ImGuiEntityPropertiesFields entityPropertiesFields = new ImGuiEntityPropertiesFields();
+
+    private void displayEntityPropertyList() {
+        ImGui.begin("Entity Properties");
+        if(currentSelectedEntity != null) {
+            if(currentSelectedEntity.hasComponent(EntityScriptComponent.class)) {
+                if(ImGui.collapsingHeader("Script Component")) {
+                    EntityScriptComponent scriptComponent = currentSelectedEntity.getComponent(EntityScriptComponent.class);
+
+                    ImGui.indent();
+                    ImGui.text(scriptComponent.classname);
+                    ImGui.sameLine();
+
+                    if(ImGui.button("edit")) {
+                        ImGui.openPopup("Edit Script Path");
+                        entityPropertiesFields.scriptPath.set(scriptComponent.classname);
+                    }
+
+                    if(displayTextEditDialogueModal(
+                        entityPropertiesFields.scriptPath,
+                        "Edit Script Path", "Script Path"
+                    )) {
+                        scriptComponent.classname = entityPropertiesFields.scriptPath.get();
+                    }
+
+                }
+            }
+        }
+        ImGui.end();
+    }
+
+    private boolean displayTextEditDialogueModal(ImString field, String windowTitle, String fieldName) {
+        boolean userShouldUpdate = false;
+
+        int windowFlags = ImGuiWindowFlags.AlwaysAutoResize;
+        ImGui.setNextWindowPos(ImGui.getWindowWidth() / 2.0f, ImGui.getWindowHeight() / 2.0f);
+        ImVec2 center = ImGui.getMainViewport().getCenter();
+        ImGui.setNextWindowPos(center.x, center.y, ImGuiCond.Appearing, 0.5f, 0.5f);
+
+        if(ImGui.beginPopupModal(windowTitle, windowFlags)) {
+            ImGui.inputText(fieldName, field, ImGuiInputTextFlags.CallbackResize);
+
+
+            if(ImGui.button("save")) {
+                ImGui.closeCurrentPopup();
+                userShouldUpdate = true;
+            }
+
+            ImGui.sameLine();
+
+            if(ImGui.button("cancel")) {
+                ImGui.closeCurrentPopup();
+            }
+
+            ImGui.endPopup();
+        }
+
+        ImGui.unindent();
+        return userShouldUpdate;
     }
 
     private void renderScene() {

@@ -4,6 +4,12 @@ import com.artemis.ComponentMapper;
 import com.artemis.World;
 import com.artemis.annotations.All;
 import com.artemis.systems.IteratingSystem;
+import mclone.Logging.Logger;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 @All(EntityScriptComponent.class)
 public class EntityScriptUpdateSystem extends IteratingSystem {
@@ -11,14 +17,48 @@ public class EntityScriptUpdateSystem extends IteratingSystem {
 
     ComponentMapper<EntityScriptComponent> entityScriptComponentMapper;
 
+    private HashMap<String, EntityScript> entityScriptMap;
+
+    EntityScript loadScript(String classname) {
+        EntityScript entityScript = null;
+        try {
+            Class<?> cls = ClassLoader.getSystemClassLoader().loadClass(classname);
+            Constructor<?> constructor = cls.getDeclaredConstructor();
+            if(cls.getSuperclass() != EntityScript.class) {
+                Logger.error("EntityScriptComponent.EntityScriptComponent", "class \"" + classname + "\" must be a subclass of EntityScript!");
+            }
+            entityScript = (EntityScript)constructor.newInstance();
+            entityScript.entity = null;
+
+        } catch (ClassNotFoundException classNotFoundException) {
+            Logger.error("EntityScriptComponent.EntityScriptComponent", "Failed to load class \"" + classname + "\"");
+        } catch (NoSuchMethodException noSuchMethodException) {
+            Logger.error("EntityScriptComponent.EntityScriptComponent", "class \"" + classname + "\" does not have a constructor with no arguments!");
+        } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+
+        return entityScript;
+    }
+
     @Override
     protected void process(int entityId) {
         EntityScriptComponent scriptComponent = entityScriptComponentMapper.get(entityId);
-        if(scriptComponent.entityScript.entity == null) {
-            scriptComponent.entityScript.entity = new Entity(getWorld(), entityId);
-            scriptComponent.entityScript.init();
+
+        EntityScript entityScript = entityScriptMap.get(scriptComponent.classname);
+        if(entityScript == null) {
+            entityScript = loadScript(scriptComponent.classname);
+            if(entityScript == null) {
+                Logger.error("Failed to load script component \"" + scriptComponent.classname + "\"");
+                return;
+            }
+            entityScriptMap.put(scriptComponent.classname, entityScript);
         }
-        scriptComponent.entityScript.update(getWorld().getDelta());
+        if(entityScript.entity == null) {
+            entityScript.entity = new Entity(getWorld(), entityId);
+            entityScript.init();
+        }
+        entityScript.update(getWorld().getDelta());
     }
 
 }

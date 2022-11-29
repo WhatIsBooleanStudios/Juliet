@@ -6,13 +6,11 @@ import com.artemis.World;
 import com.artemis.WorldConfigurationBuilder;
 import com.artemis.io.JsonArtemisSerializer;
 import com.artemis.io.SaveFileFormat;
+import com.artemis.managers.TagManager;
 import com.artemis.managers.WorldSerializationManager;
 import com.artemis.utils.IntBag;
-import mclone.Editor.SceneEntityDisplaySystem;
 
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -21,8 +19,8 @@ public class Scene {
         WorldSerializationManager serializationManager = new WorldSerializationManager();
         WorldConfigurationBuilder builder = new WorldConfigurationBuilder()
             .with(serializationManager)
-            .with(new EntityScriptUpdateSystem())
-            .with(new SceneEntityDisplaySystem());
+            .with(new TagManager())
+            .with(new EntityScriptUpdateSystem());
 
         world = new World(builder.build());
         serializationManager.setSerializer(new JsonArtemisSerializer(world));
@@ -48,8 +46,9 @@ public class Scene {
         world.process();
     }
 
-    public Entity createEntity() {
+    public Entity createEntity(String tag) {
         int entityID = world.create();
+        world.getSystem(TagManager.class).register(tag, entityID);
         return new Entity(world, entityID);
     }
 
@@ -65,12 +64,23 @@ public class Scene {
         world.getSystem(EntityScriptUpdateSystem.class).setEnabled(true);
     }
 
-    public void disableSceneEntityDisplaySystem() {
-        world.getSystem(SceneEntityDisplaySystem.class).setEnabled(false);
+
+    IntBag compiledEntitiesList;
+
+    public void __compileEntitiesList() {
+        compiledEntitiesList = world.getAspectSubscriptionManager().get(Aspect.all()).getEntities();
     }
 
-    public void enableSceneEntityDisplaySystem() {
-        world.getSystem(SceneEntityDisplaySystem.class).setEnabled(true);
+    /**
+     * @warn Call compileEntitiesList
+     * @return
+     */
+    public int __getNumEntities() {
+        return compiledEntitiesList.size();
+    }
+
+    public Entity __getEntityByInternalListIndex(int index) {
+        return new Entity(world, compiledEntitiesList.get(index));
     }
 
     private World world;
