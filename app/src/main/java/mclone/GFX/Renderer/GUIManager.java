@@ -19,17 +19,17 @@ import static org.lwjgl.glfw.GLFW.*;
  */
 
 class _ImColor {
-    public _ImColor(float R, float G, float B) {
-        r = R;
-        g = G;
-        b = B;
+    public _ImColor(float r, float g, float b) {
+        this.r = r;
+        this.g = g;
+        this.b = b;
     }
 
-    public _ImColor(float R, float G, float B, float A) {
-        r = R;
-        g = G;
-        b = B;
-        a = A;
+    public _ImColor(float r, float g, float b, float a) {
+        this.r = r;
+        this.g = g;
+        this.b = b;
+        this.a = a;
     }
 
     public _ImColor(ImVec4 color) {
@@ -121,15 +121,15 @@ public class GUIManager {
         setImGuiStyleColor(ImGuiCol.PlotLinesHovered, new _ImColor(29, 151, 236));
         setImGuiStyleColor(ImGuiCol.PlotHistogram, new _ImColor(0, 119, 200));
         setImGuiStyleColor(ImGuiCol.PlotHistogramHovered, new _ImColor(29, 151, 236));
-        setImGuiStyleColor(ImGuiCol.ModalWindowDimBg, new _ImColor(37, 37, 37));
+        setImGuiStyleColor(ImGuiCol.ModalWindowDimBg, new _ImColor(37, 37, 37, 180));
         setImGuiStyleColor(ImGuiCol.DragDropTarget, new _ImColor(37, 37, 37));
         setImGuiStyleColor(ImGuiCol.NavHighlight, new _ImColor(37, 37, 37));
         setImGuiStyleColor(ImGuiCol.DockingPreview, new _ImColor(0, 119, 200));
         setImGuiStyleColor(ImGuiCol.Tab, new _ImColor(37, 37, 37));
         setImGuiStyleColor(ImGuiCol.TabActive, new _ImColor(0, 119, 200));
-        setImGuiStyleColor(ImGuiCol.TabHovered, new _ImColor(37, 37, 37));
-        setImGuiStyleColor(ImGuiCol.TabUnfocused, new _ImColor(0, 119, 200));
-        setImGuiStyleColor(ImGuiCol.TabUnfocusedActive, new _ImColor(29, 151, 236));
+        setImGuiStyleColor(ImGuiCol.TabHovered, new _ImColor(29, 151, 236));
+        setImGuiStyleColor(ImGuiCol.TabUnfocused, new _ImColor(37, 37, 38));
+        setImGuiStyleColor(ImGuiCol.TabUnfocusedActive, new _ImColor(0, 119, 200));
 
         glfwImpl.init(window, true);
         gl3Impl.init("#version 330");
