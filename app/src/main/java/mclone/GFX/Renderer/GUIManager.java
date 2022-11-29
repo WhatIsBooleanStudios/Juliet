@@ -10,13 +10,6 @@ import mclone.Platform.Window;
 
 import static org.lwjgl.glfw.GLFW.*;
 
-/**
- * This class is a straightforward port of the
- * <a href="https://raw.githubusercontent.com/ocornut/imgui/256594575d95d56dda616c544c509740e74906b4/backends/imgui_impl_glfw.cpp">imgui_impl_glfw.cpp</a>.
- * <p>
- * It supports clipboard, gamepad, mouse and keyboard in the same way the original Dear ImGui code does. You can copy-paste this class in your codebase and
- * modify the rendering routine in the way you'd like.
- */
 
 class _ImColor {
     public _ImColor(float r, float g, float b) {
