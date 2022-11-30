@@ -84,4 +84,8 @@ public class Scene {
     }
 
     private World world;
+
+    public boolean hasEntityByName(String s) {
+        return world.getSystem(TagManager.class).getEntityId(s) >= 0;
+    }
 }

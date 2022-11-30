@@ -1,11 +1,10 @@
 package mclone.Editor;
 
+import imgui.ImColor;
 import imgui.ImGui;
 import imgui.ImVec2;
-import imgui.flag.ImGuiCond;
-import imgui.flag.ImGuiInputTextFlags;
-import imgui.flag.ImGuiTreeNodeFlags;
-import imgui.flag.ImGuiWindowFlags;
+import imgui.flag.*;
+import imgui.internal.ImGuiWindow;
 import imgui.type.ImString;
 import mclone.ECS.Entity;
 import mclone.ECS.EntityScriptComponent;
@@ -80,7 +79,7 @@ public class Editor {
     Entity currentSelectedEntity = null;
     private void displayEntityTree() {
         tempScene.__compileEntitiesList();
-        ImGui.begin("Scene Hierarchy");
+        ImGui.begin("Scene Hierarchy", ImGuiWindowFlags.AlwaysUseWindowPadding);
 
         if(ImGui.imageButton(EditorIcons.addTexture.getNativeHandle(), (float)ImGui.getFont().getFontSize(), (float)ImGui.getFontSize())) {
             ImGui.openPopup("Create New Entity");
@@ -94,16 +93,19 @@ public class Editor {
         ImGui.spacing();
 
         if(displayTextEditDialogueModal(entityPropertiesFields.entityCreateEntityName, "Create New Entity", "Entity Name")) {
-            Entity entity = tempScene.createEntity(entityPropertiesFields.entityCreateEntityName.get());
-            entity.addComponent(new TransformComponent(new Vector3f(0.0f, 0.0f, 0.0f)));
+            if(entityPropertiesFields.entityCreateEntityName.isNotEmpty() && !tempScene.hasEntityByName(entityPropertiesFields.entityCreateEntityName.get())) {
+                Entity entity = tempScene.createEntity(entityPropertiesFields.entityCreateEntityName.get());
+                entity.addComponent(new TransformComponent(new Vector3f(0.0f, 0.0f, 0.0f)));
+            }
         }
 
 
-        //ImGui.spacing();
 
 
         for(int i = 0; i < tempScene.__getNumEntities(); i++) {
-            int nodeFlags = ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.NoTreePushOnOpen;
+            int nodeFlags = ImGuiTreeNodeFlags.Leaf |
+                ImGuiTreeNodeFlags.NoTreePushOnOpen |
+                ImGuiTreeNodeFlags.FramePadding;
             Entity entity = tempScene.__getEntityByInternalListIndex(i);
 
             if(entity.getName().contains(entityPropertiesFields.entitySearchBarContents.get())) {
@@ -112,14 +114,21 @@ public class Editor {
                     nodeFlags |= ImGuiTreeNodeFlags.Selected;
                 }
 
+
+                ImGui.pushID(i);
+                ImGui.pushStyleVar(ImGuiStyleVar.FramePadding, 0.0f, 3.0f);
                 if (ImGui.treeNodeEx(i, nodeFlags, entity.getName())) {
                     if (ImGui.isItemClicked() || ImGui.isItemFocused()) {
                         currentSelectedEntity = entity;
                     }
                 }
+                ImGui.separator();
+                ImGui.popStyleVar();
+                ImGui.popID();
 
             }
         }
+
         ImGui.text(currentSelectedEntity != null ? currentSelectedEntity.toString() : "null");
         ImGui.end();
 
