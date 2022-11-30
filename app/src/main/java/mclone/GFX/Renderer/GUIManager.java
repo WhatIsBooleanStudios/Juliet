@@ -72,6 +72,10 @@ public class GUIManager {
         ctx = ImGui.createContext();
 
         ImGuiIO io = ImGui.getIO();
+
+        byte[] FontData = Filesystem.getFileBytesFromResourceDirectory("/Fonts/FiraCode-Regular.ttf");
+        ImGui.getIO().getFonts().addFontFromMemoryTTF(FontData, 18.0f);
+
         io.addConfigFlags(ImGuiConfigFlags.ViewportsEnable | ImGuiConfigFlags.DockingEnable);
         io.setConfigViewportsNoTaskBarIcon(true);
         io.setConfigMacOSXBehaviors(true);
