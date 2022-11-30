@@ -83,6 +83,11 @@ task runNDebug(type: JavaExec) {
     }
 }
 
+task copyDependencyJars(type: Copy) {
+    from configurations.compileClasspath
+    into "${buildDir}/libs"
+}
+
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(16))

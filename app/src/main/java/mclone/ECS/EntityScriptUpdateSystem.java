@@ -1,14 +1,12 @@
 package mclone.ECS;
 
 import com.artemis.ComponentMapper;
-import com.artemis.World;
 import com.artemis.annotations.All;
 import com.artemis.systems.IteratingSystem;
 import mclone.Logging.Logger;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 @All(EntityScriptComponent.class)
@@ -17,7 +15,7 @@ public class EntityScriptUpdateSystem extends IteratingSystem {
 
     ComponentMapper<EntityScriptComponent> entityScriptComponentMapper;
 
-    private HashMap<String, EntityScript> entityScriptMap;
+    private HashMap<Integer, EntityScript> entityScriptMap;
 
     EntityScript loadScript(String classname) {
         EntityScript entityScript = null;
@@ -45,14 +43,14 @@ public class EntityScriptUpdateSystem extends IteratingSystem {
     protected void process(int entityId) {
         EntityScriptComponent scriptComponent = entityScriptComponentMapper.get(entityId);
 
-        EntityScript entityScript = entityScriptMap.get(scriptComponent.classname);
+        EntityScript entityScript = entityScriptMap.get(entityId);
         if(entityScript == null) {
             entityScript = loadScript(scriptComponent.classname);
             if(entityScript == null) {
                 Logger.error("Failed to load script component \"" + scriptComponent.classname + "\"");
                 return;
             }
-            entityScriptMap.put(scriptComponent.classname, entityScript);
+            entityScriptMap.put(entityId, entityScript);
         }
         if(entityScript.entity == null) {
             entityScript.entity = new Entity(getWorld(), entityId);
@@ -61,4 +59,9 @@ public class EntityScriptUpdateSystem extends IteratingSystem {
         entityScript.update(getWorld().getDelta());
     }
 
+    @Override
+    protected void removed(int entityId) {
+        entityScriptMap.remove(entityId);
+        super.removed(entityId);
+    }
 }

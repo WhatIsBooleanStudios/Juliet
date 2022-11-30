@@ -1,30 +1,25 @@
 package mclone.Editor;
 
-import com.artemis.utils.IntBag;
 import imgui.ImGui;
 import imgui.ImVec2;
 import imgui.flag.ImGuiCond;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.flag.ImGuiTreeNodeFlags;
 import imgui.flag.ImGuiWindowFlags;
-import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import mclone.ECS.Entity;
 import mclone.ECS.EntityScriptComponent;
-import mclone.ECS.NameComponent;
 import mclone.ECS.Scene;
+import mclone.ECS.TransformComponent;
 import mclone.GFX.OpenGL.FrameBuffer;
 import mclone.GFX.OpenGL.GraphicsAPI;
-import mclone.GFX.Renderer.CameraController;
 import mclone.GFX.Renderer.FPSCameraController;
 import mclone.GFX.Renderer.Model;
 import mclone.GFX.Renderer.Renderer;
-import mclone.Logging.Logger;
-import mclone.Platform.TimeStep;
 import mclone.Platform.Window;
 import org.joml.Vector3f;
 
-import java.awt.*;
+import javax.xml.crypto.dsig.Transform;
 
 public class Editor {
     public Editor() {}
@@ -36,6 +31,8 @@ public class Editor {
 
         renderer = new Renderer(mainWindow);
 
+        EditorIcons.load();
+
         testModel = renderer.getModelLoader().load("models/salmonCube.glb");
 
         mainWindow.setMousePosition(mainWindow.getScreenCenter());
@@ -43,17 +40,14 @@ public class Editor {
 
         tempScene = new Scene();
         tempScene.disableScriptSystem();
-        Entity tempEntity = tempScene.createEntity("ENTITY_TEST0");
-        tempEntity.addComponent(new EntityScriptComponent("mclone.TestScript"));
-        Entity tempEntity2 = tempScene.createEntity("ENTITY_TEST1");
-        tempEntity2.addComponent(new EntityScriptComponent("mclone.TestScript"));
-        tempScene.process(0.0f);
     }
 
     public void update(float delta) {
         Window.windowSystemPollEvents();
         mainWindow.makeContextCurrent();
         updateInput();
+
+        tempScene.process(0.0f);
 
         GraphicsAPI.setClearColor(0.0f, 0.0f, 0.0f, 1.0f);
         GraphicsAPI.clear();
@@ -87,18 +81,43 @@ public class Editor {
     private void displayEntityTree() {
         tempScene.__compileEntitiesList();
         ImGui.begin("Scene Hierarchy");
+
+        if(ImGui.imageButton(EditorIcons.addTexture.getNativeHandle(), (float)ImGui.getFont().getFontSize(), (float)ImGui.getFontSize())) {
+            ImGui.openPopup("Create New Entity");
+        }
+
+        ImGui.sameLine();
+        ImGui.setNextItemWidth(ImGui.getContentRegionAvailX());
+        ImGui.inputText("##EntitySearch", entityPropertiesFields.entitySearchBarContents, ImGuiInputTextFlags.CallbackResize);
+        ImGui.separator();
+
+        ImGui.spacing();
+
+        if(displayTextEditDialogueModal(entityPropertiesFields.entityCreateEntityName, "Create New Entity", "Entity Name")) {
+            Entity entity = tempScene.createEntity(entityPropertiesFields.entityCreateEntityName.get());
+            entity.addComponent(new TransformComponent(new Vector3f(0.0f, 0.0f, 0.0f)));
+        }
+
+
+        //ImGui.spacing();
+
+
         for(int i = 0; i < tempScene.__getNumEntities(); i++) {
             int nodeFlags = ImGuiTreeNodeFlags.Leaf | ImGuiTreeNodeFlags.NoTreePushOnOpen;
             Entity entity = tempScene.__getEntityByInternalListIndex(i);
 
-            if (currentSelectedEntity != null && currentSelectedEntity.equals(entity)) {
-                nodeFlags |= ImGuiTreeNodeFlags.Selected;
-            }
+            if(entity.getName().contains(entityPropertiesFields.entitySearchBarContents.get())) {
 
-            if(ImGui.treeNodeEx(i, nodeFlags, entity.getName())) {
-                if (ImGui.isItemClicked() || ImGui.isItemFocused()) {
-                    currentSelectedEntity = entity;
+                if (currentSelectedEntity != null && currentSelectedEntity.equals(entity)) {
+                    nodeFlags |= ImGuiTreeNodeFlags.Selected;
                 }
+
+                if (ImGui.treeNodeEx(i, nodeFlags, entity.getName())) {
+                    if (ImGui.isItemClicked() || ImGui.isItemFocused()) {
+                        currentSelectedEntity = entity;
+                    }
+                }
+
             }
         }
         ImGui.text(currentSelectedEntity != null ? currentSelectedEntity.toString() : "null");
@@ -109,6 +128,9 @@ public class Editor {
 
     private static class ImGuiEntityPropertiesFields {
         public ImGuiEntityPropertiesFields() {}
+
+        public ImString entityCreateEntityName = new ImString();
+        public ImString entitySearchBarContents = new ImString();
         public ImString scriptPath = new ImString();
     } ImGuiEntityPropertiesFields entityPropertiesFields = new ImGuiEntityPropertiesFields();
 
@@ -127,6 +149,7 @@ public class Editor {
                         ImGui.openPopup("Edit Script Path");
                         entityPropertiesFields.scriptPath.set(scriptComponent.classname);
                     }
+                    ImGui.unindent();
 
                     if(displayTextEditDialogueModal(
                         entityPropertiesFields.scriptPath,
@@ -135,6 +158,40 @@ public class Editor {
                         scriptComponent.classname = entityPropertiesFields.scriptPath.get();
                     }
 
+                }
+            }
+
+            if(currentSelectedEntity.hasComponent(TransformComponent.class)) {
+                TransformComponent component = currentSelectedEntity.getComponent(TransformComponent.class);
+
+                if(ImGui.collapsingHeader("Transform")) {
+                    ImGui.indent();
+                    float[] x = new float[]{component.position.x};
+                    float[] y = new float[]{component.position.y};
+                    float[] z = new float[]{component.position.z};
+
+                    ImGui.text("Position");
+                    ImGui.indent();
+
+                    ImGui.text("X");
+                    ImGui.sameLine();
+                    ImGui.dragFloat("##X", x);
+
+                    ImGui.text("Y");
+                    ImGui.sameLine();
+                    ImGui.dragFloat("##Y", y);
+
+                    ImGui.text("Z");
+                    ImGui.sameLine();
+                    ImGui.dragFloat("##Z", z);
+
+                    ImGui.unindent();
+
+                    component.position.x = x[0];
+                    component.position.y = y[0];
+                    component.position.z = z[0];
+
+                    ImGui.unindent();
                 }
             }
         }
@@ -152,7 +209,6 @@ public class Editor {
         if(ImGui.beginPopupModal(windowTitle, windowFlags)) {
             ImGui.inputText(fieldName, field, ImGuiInputTextFlags.CallbackResize);
 
-
             if(ImGui.button("save")) {
                 ImGui.closeCurrentPopup();
                 userShouldUpdate = true;
@@ -167,7 +223,7 @@ public class Editor {
             ImGui.endPopup();
         }
 
-        ImGui.unindent();
+        //ImGui.unindent();
         return userShouldUpdate;
     }
 
@@ -230,6 +286,8 @@ public class Editor {
         if(sceneFramebuffer != null) {
             sceneFramebuffer.dispose();
         }
+
+        EditorIcons.dispose();
 
         renderer.shutdown();
         mainWindow.dispose();
