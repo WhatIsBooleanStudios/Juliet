@@ -18,9 +18,9 @@ public class PointLightsComponent extends Component {
         public float intensity = 0.0f;
     }
 
-    PointLightsComponent() {}
+    public PointLightsComponent() {}
 
-    PointLightsComponent(PointLightData[] data) {
+    public PointLightsComponent(PointLightData[] data) {
         pointLightData = data;
     }
 

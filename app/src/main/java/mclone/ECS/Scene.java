@@ -1,26 +1,25 @@
 package mclone.ECS;
 
-import com.artemis.Aspect;
-import com.artemis.EntitySubscription;
-import com.artemis.World;
-import com.artemis.WorldConfigurationBuilder;
+import com.artemis.*;
 import com.artemis.io.JsonArtemisSerializer;
 import com.artemis.io.SaveFileFormat;
 import com.artemis.managers.TagManager;
 import com.artemis.managers.WorldSerializationManager;
 import com.artemis.utils.IntBag;
+import mclone.GFX.Renderer.Renderer;
 
 import java.io.FileOutputStream;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class Scene {
-    public Scene() {
+    public Scene(Renderer renderer) {
         WorldSerializationManager serializationManager = new WorldSerializationManager();
         WorldConfigurationBuilder builder = new WorldConfigurationBuilder()
             .with(serializationManager)
             .with(new TagManager())
-            .with(new EntityScriptUpdateSystem());
+            .with(new EntityScriptUpdateSystem())
+            .with(new LightingSystem(renderer.getLightManager()));
 
         world = new World(builder.build());
         serializationManager.setSerializer(new JsonArtemisSerializer(world));
