@@ -1,4 +1,4 @@
-# mClone
+# Juliet
 Minecraft is an open world adventure game with millions of players, mClone is an immitation made for a AP Computer Science course.
 
 ## Compiling
