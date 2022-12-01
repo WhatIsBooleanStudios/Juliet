@@ -58,7 +58,7 @@ dependencies {
 
 application {
     // Define the main class for the application.
-    mainClass = 'mclone.App'
+    mainClass = 'juliet.App'
 	if (OperatingSystem.current() == OperatingSystem.MAC_OS)
     	applicationDefaultJvmArgs = ['-XstartOnFirstThread', '-javaagent:' + project.rootDir + '/debug-util/lwjglx-debug-1.0.0.jar'];
     else {
