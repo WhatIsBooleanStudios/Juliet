@@ -4,10 +4,12 @@ import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.glfw.Callbacks.*;
 import static org.lwjgl.opengl.GL33.*;
 
+import mclone.GFX.OpenGL.GraphicsAPI;
 import mclone.Logging.Logger;
 import org.joml.Vector3f;
 import org.lwjgl.glfw.*;
 import org.joml.Vector2f;
+import org.lwjgl.opengl.GL;
 import org.lwjgl.system.MemoryStack;
 import static org.lwjgl.system.MemoryUtil.*;
 
@@ -164,10 +166,16 @@ public class Window {
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
         glfwWindowHint(GLFW_CONTEXT_DEBUG, GL_TRUE);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+        glfwWindowHint(GLFW_COCOA_RETINA_FRAMEBUFFER, GL_FALSE);
         windowHandle = glfwCreateWindow(width, height, title, fullscreen ? glfwGetPrimaryMonitor() : 0, 0);
         if (windowHandle == 0) {
             Logger.error("Window.new", this, "Failed to create window \"" + title + "\"!");
         }
+
+        GraphicsAPI.initializeWindow(this);
+
+        int[] fbwidth = new int[1], fbheight = new int[1];
+        glfwGetFramebufferSize(windowHandle, fbwidth, fbheight);
     }
 
     public static void initializeWindowSystem() {

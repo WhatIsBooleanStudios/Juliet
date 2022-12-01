@@ -1,0 +1,1 @@
+{"entities":{"0":{"archetype":2,"components":{"EntityScriptComponent":{"entityScript":{"class":"mclone.TestScript"}},"NameComponent":{"name":"Entity_test"}}}},"archetypes":{"2":["EntityScriptComponent","NameComponent"]},"componentIdentifiers":{"mclone.ECS.EntityScriptComponent":"EntityScriptComponent","mclone.ECS.NameComponent":"NameComponent"},"metadata":{"version":1}}

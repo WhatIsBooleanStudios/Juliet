@@ -1,6 +1,5 @@
 package mclone.GFX.Renderer;
 
-import mclone.Logging.Logger;
 import org.joml.Vector3f;
 import org.joml.Matrix4f;
 import org.joml.Vector3fc;
@@ -14,6 +13,11 @@ public class Camera {
     public Camera(float aspectRatio, float fovY) {
         this.projection = new Matrix4f().perspective(fovY, aspectRatio, 0.08f, 100.0f);
         this.projectionXView = calculate();
+    }
+
+    public void updateProjection(float aspectRatio, float fovY) {
+        this.projection.setPerspective(fovY, aspectRatio, 0.08f, 100.0f);
+        this.projectionXView.set(calculate());
     }
 
     /**
@@ -54,6 +58,11 @@ public class Camera {
      * @param pitch The pitch to overwrite
      */
     public void setPitch(float pitch) { this.pitch = pitch; this.projectionXView.set(calculate()); }
+
+    /**
+     * @return Gets the pitch of the direction view
+     */
+    public float getPitch() { return this.pitch; }
 
     /**
      * Offsets the current pitch value

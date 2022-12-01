@@ -41,6 +41,10 @@ public class Texture {
         stbi_image_free(data);
     }
 
+    public int getNativeHandle() {
+        return id;
+    }
+
     /**
      * Creates a Texture from preloaded data.
      * @param name The name of the texture (user defined)
