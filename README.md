@@ -1,5 +1,5 @@
 # Juliet
-Minecraft is an open world adventure game with millions of players, mClone is an immitation made for a AP Computer Science course.
+Minecraft is an open world adventure game with millions of players, Juliet is an immitation made for a AP Computer Science course.
 
 ## Compiling
 | Component     | Version|
