@@ -74,7 +74,7 @@ public class GUIManager {
         ImGuiIO io = ImGui.getIO();
 
         byte[] FontData = Filesystem.getFileBytesFromResourceDirectory("/Fonts/FiraCode-Regular.ttf");
-        ImGui.getIO().getFonts().addFontFromMemoryTTF(FontData, 18.0f);
+        ImGui.getIO().getFonts().addFontFromMemoryTTF(FontData, 16.0f);
 
         io.addConfigFlags(ImGuiConfigFlags.ViewportsEnable | ImGuiConfigFlags.DockingEnable);
         io.setConfigViewportsNoTaskBarIcon(true);
