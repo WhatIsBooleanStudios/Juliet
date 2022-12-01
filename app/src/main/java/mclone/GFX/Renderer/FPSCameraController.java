@@ -51,9 +51,11 @@ public class FPSCameraController extends CameraController {
             //previousMousePosition.set(mousePosition);
             float sensitivity = 0.001f;
             mouseOffset.mul(sensitivity);
-
             camera.offsetYaw(mouseOffset.x);
-            camera.offsetPitch(-mouseOffset.y);
+
+            // min and max pitch values, so we don't overshoot the camera.
+            if(camera.getPitch() - mouseOffset.y <= (Math.PI / 2) && camera.getPitch() - mouseOffset.y >= -(Math.PI / 2) )
+                camera.offsetPitch(-mouseOffset.y);
 
             if (firstUpdate || mouseOffset.x != 0 || mouseOffset.y != 0 || positionModified) {
                 ubo.setData(camera.getProjectionXView().get(stack.mallocFloat(16)), 16 * 4);
