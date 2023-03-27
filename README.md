@@ -1,5 +1,5 @@
 # Juliet
-Minecraft is an open world adventure game with millions of players, Juliet is an immitation made for a AP Computer Science course.
+A Physically Based Rendering playground created for our AP Computer Science course.
 
 ## Compiling
 | Component     | Version|
